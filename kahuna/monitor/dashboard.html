@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Kahuna Ingestion Worker Engine real-time telemetry dashboard. Track processed, quarantined, and system metrics live.">
+    <title>Kahuna Telemetry Monitor</title>
+    <!-- Modern web font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0c10;
+            --panel-bg: rgba(22, 24, 33, 0.65);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            
+            --accent-purple: #8b5cf6;
+            --accent-purple-glow: rgba(139, 92, 246, 0.15);
+            --accent-green: #10b981;
+            --accent-green-glow: rgba(16, 185, 129, 0.15);
+            --accent-red: #ef4444;
+            --accent-red-glow: rgba(239, 68, 68, 0.15);
+            --accent-blue: #3b82f6;
+            --accent-blue-glow: rgba(59, 130, 246, 0.15);
+            
+            --transition-speed: 0.2s;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(139, 92, 246, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 85% 75%, rgba(59, 130, 246, 0.06) 0%, transparent 45%),
+                radial-gradient(circle at 50% 50%, rgba(239, 68, 68, 0.02) 0%, transparent 50%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Layout & Container */
+        .app-container {
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            flex: 1;
+        }
+
+        /* Header design */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .pulse-dot {
+            width: 10px;
+            height: 10px;
+            background-color: var(--accent-green);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-green);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            }
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+            }
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+            }
+        }
+
+        header h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 30%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em;
+        }
+
+        .controls-section {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* Switch styling */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 34px;
+            height: 20px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #374151;
+            transition: var(--transition-speed);
+            border-radius: 20px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: var(--transition-speed);
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--accent-purple);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(14px);
+        }
+
+        .update-indicator {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .spinner {
+            width: 12px;
+            height: 12px;
+            border: 2px solid rgba(255,255,255,0.1);
+            border-top: 2px solid var(--accent-purple);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+
+        .spinner.active {
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Grid of stats */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .metric-card {
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: relative;
+            overflow: hidden;
+            transition: transform var(--transition-speed), border-color var(--transition-speed);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .metric-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+        }
+
+        .metric-card.received::before { background: var(--accent-blue); }
+        .metric-card.processed::before { background: var(--accent-green); }
+        .metric-card.quarantined::before { background: var(--accent-red); }
+        .metric-card.uptime::before { background: var(--accent-purple); }
+
+        .metric-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .metric-label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .metric-value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            line-height: 1;
+            letter-spacing: -0.02em;
+        }
+
+        .metric-subtext {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Dashboard Core Layout split */
+        .dashboard-body {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-body {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .main-panel {
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            min-height: 450px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Source metrics list */
+        .sources-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .source-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: background var(--transition-speed);
+        }
+
+        .source-card:hover {
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .source-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .source-name {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .source-badge {
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+        .source-badge.KALSHI { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+        .source-badge.POLYMARKET { background: rgba(139, 92, 246, 0.15); color: #a78bfa; border: 1px solid rgba(139, 92, 246, 0.3); }
+        .source-badge.REUTERS { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .source-badge.TWITTER { background: rgba(6, 182, 212, 0.15); color: #22d3ee; border: 1px solid rgba(6, 182, 212, 0.3); }
+
+        .source-last-time {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .source-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            text-align: center;
+        }
+
+        .source-stat-box {
+            background: rgba(0, 0, 0, 0.15);
+            padding: 8px 4px;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.02);
+        }
+
+        .source-stat-label {
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+
+        .source-stat-val {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+        .source-stat-val.processed { color: var(--accent-green); }
+        .source-stat-val.quarantined { color: var(--accent-red); }
+
+        /* Progress bars inside sources */
+        .source-progress-bar {
+            height: 4px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 2px;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .source-progress-fill {
+            height: 100%;
+            background: var(--accent-green);
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        /* Recent Events Table */
+        .table-wrapper {
+            overflow-x: auto;
+            flex: 1;
+            margin-top: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.85rem;
+        }
+
+        th {
+            font-weight: 500;
+            color: var(--text-secondary);
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        tr {
+            cursor: pointer;
+            transition: background var(--transition-speed);
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            line-height: 1;
+        }
+
+        .badge.processed {
+            background-color: var(--accent-green-glow);
+            color: #6ee7b7;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .badge.quarantined {
+            background-color: var(--accent-red-glow);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .hash-cell {
+            font-family: monospace;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        .url-cell {
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--accent-blue);
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 300px;
+            color: var(--text-secondary);
+            gap: 12px;
+        }
+
+        .empty-state svg {
+            width: 48px;
+            height: 48px;
+            opacity: 0.3;
+        }
+
+        /* Sidebar system container */
+        .sidebar-container {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .sidebar-panel {
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .sys-info-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .sys-info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            padding-bottom: 8px;
+        }
+
+        .sys-info-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .sys-info-label {
+            color: var(--text-secondary);
+        }
+
+        .sys-info-value {
+            font-weight: 500;
+            font-family: monospace;
+            color: var(--text-primary);
+        }
+
+        /* Modal Overlay & Panel */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: #11131c;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            max-width: 700px;
+            width: 100%;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+            transform: scale(0.95);
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background var(--transition-speed);
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            font-size: 0.9rem;
+        }
+
+        .modal-meta-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            background: rgba(255,255,255,0.02);
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.04);
+        }
+
+        .modal-meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .modal-meta-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .modal-meta-value {
+            font-weight: 500;
+        }
+
+        .modal-code-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .modal-code-header {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .modal-code-wrapper {
+            position: relative;
+        }
+
+        pre {
+            background: #06070a;
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.82rem;
+            overflow-x: auto;
+            max-height: 250px;
+            color: #d1d5db;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-secondary);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: background var(--transition-speed);
+        }
+
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+        }
+
+        /* Footer */
+        footer {
+            margin-top: auto;
+            text-align: center;
+            padding: 32px 0 16px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        footer a {
+            color: var(--accent-purple);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header>
+            <div class="logo-section">
+                <div class="pulse-dot" id="active-pulse"></div>
+                <h1 id="main-title">Kahuna worker monitor</h1>
+            </div>
+            <div class="controls-section">
+                <div class="update-indicator">
+                    <div class="spinner" id="loading-spinner"></div>
+                    <span id="update-status">Connected</span>
+                </div>
+                <div class="toggle-container">
+                    <label for="autorefresh-switch">Auto Refresh</label>
+                    <label class="switch">
+                        <input type="checkbox" id="autorefresh-switch" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </header>
+
+        <!-- Stat Cards -->
+        <section class="metrics-grid" aria-label="System Metrics Summary">
+            <!-- Received -->
+            <div class="metric-card received" id="metric-recv-card">
+                <span class="metric-label">Total Ingested</span>
+                <div class="metric-value" id="metric-total">0</div>
+                <div class="metric-subtext">
+                    <span>Aggregate incoming pipeline events</span>
+                </div>
+            </div>
+            <!-- Processed -->
+            <div class="metric-card processed" id="metric-proc-card">
+                <span class="metric-label">Processed (Valid)</span>
+                <div class="metric-value" id="metric-processed" style="color: var(--accent-green);">0</div>
+                <div class="metric-subtext">
+                    <span id="metric-proc-percent">0% of total events</span>
+                </div>
+            </div>
+            <!-- Quarantined -->
+            <div class="metric-card quarantined" id="metric-quar-card">
+                <span class="metric-label">Quarantined</span>
+                <div class="metric-value" id="metric-quarantined" style="color: var(--accent-red);">0</div>
+                <div class="metric-subtext">
+                    <span id="metric-quar-percent">0% of total events</span>
+                </div>
+            </div>
+            <!-- Uptime -->
+            <div class="metric-card uptime" id="metric-uptime-card">
+                <span class="metric-label">Worker Uptime</span>
+                <div class="metric-value" id="metric-uptime">0s</div>
+                <div class="metric-subtext">
+                    <span>Since engine initialization</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Body -->
+        <div class="dashboard-body">
+            <!-- Left: Events table -->
+            <main class="main-panel" aria-label="Recent Pipeline Events">
+                <h2 class="card-title">Recent ingestion events</h2>
+                <div class="table-wrapper">
+                    <table id="events-table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Source</th>
+                                <th>Status</th>
+                                <th>Source URL</th>
+                                <th>Payload Hash</th>
+                            </tr>
+                        </thead>
+                        <tbody id="events-tbody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                    <div class="empty-state" id="table-empty-state">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                        </svg>
+                        <p>No events recorded yet. Ingestion channel is quiet.</p>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Right Sidebar: Sources and system stats -->
+            <div class="sidebar-container">
+                <!-- Ingestion Sources -->
+                <section class="sidebar-panel" aria-label="Ingestion Source Breakdown">
+                    <h2 class="card-title">Ingestion sources</h2>
+                    <div class="sources-grid" id="sources-list">
+                        <!-- Populated dynamically -->
+                    </div>
+                </section>
+
+                <!-- System Info -->
+                <section class="sidebar-panel" aria-label="Go Engine Environment Metrics">
+                    <h2 class="card-title">System telemetry</h2>
+                    <div class="sys-info-list">
+                        <div class="sys-info-item">
+                            <span class="sys-info-label">Active Goroutines</span>
+                            <span class="sys-info-value" id="sys-goroutines">0</span>
+                        </div>
+                        <div class="sys-info-item">
+                            <span class="sys-info-label">Memory Allocated</span>
+                            <span class="sys-info-value" id="sys-alloc">0 MB</span>
+                        </div>
+                        <div class="sys-info-item">
+                            <span class="sys-info-label">System Memory</span>
+                            <span class="sys-info-value" id="sys-total">0 MB</span>
+                        </div>
+                        <div class="sys-info-item">
+                            <span class="sys-info-label">GC Collections</span>
+                            <span class="sys-info-value" id="sys-gc">0</span>
+                        </div>
+                        <div class="sys-info-item">
+                            <span class="sys-info-label">Go Version</span>
+                            <span class="sys-info-value" id="sys-version">Go 1.x</span>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            <div>Gekko Kahuna worker engine • Real-time Monitoring Panel</div>
+            <div>Designed for speed and safety. <a href="https://github.com/segmentio/kafka-go" target="_blank" rel="noopener">Kafka backend</a></div>
+        </footer>
+    </div>
+
+    <!-- Modal Inspector -->
+    <div class="modal-overlay" id="event-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modal-title-text">Ingested event inspector</h3>
+                <button class="modal-close" id="modal-close-btn" aria-label="Close Inspector">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-meta-grid">
+                    <div class="modal-meta-item">
+                        <span class="modal-meta-label">Source</span>
+                        <span class="modal-meta-value" id="modal-source">-</span>
+                    </div>
+                    <div class="modal-meta-item">
+                        <span class="modal-meta-label">Status</span>
+                        <span class="modal-meta-value" id="modal-status">-</span>
+                    </div>
+                    <div class="modal-meta-item" style="grid-column: span 2;">
+                        <span class="modal-meta-label">Resource URI</span>
+                        <span class="modal-meta-value" id="modal-url" style="word-break: break-all;">-</span>
+                    </div>
+                    <div class="modal-meta-item" id="modal-reason-container" style="grid-column: span 2; display: none;">
+                        <span class="modal-meta-label" style="color: var(--accent-red);">Quarantine Reason</span>
+                        <span class="modal-meta-value" id="modal-reason" style="color: #fca5a5;">-</span>
+                    </div>
+                    <div class="modal-meta-item" style="grid-column: span 2;">
+                        <span class="modal-meta-label">SHA-256 payload Hash</span>
+                        <span class="modal-meta-value" id="modal-hash" style="font-family: monospace; font-size: 0.82rem;">-</span>
+                    </div>
+                </div>
+                <div class="modal-code-section">
+                    <span class="modal-code-header">Raw payload content (<span id="modal-payload-bytes">0</span> bytes)</span>
+                    <div class="modal-code-wrapper">
+                        <button class="copy-btn" id="modal-copy-btn">Copy</button>
+                        <pre><code id="modal-payload-content">Select an event to view content...</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State variables
+        let refreshIntervalId = null;
+        let recentEvents = [];
+        let uptimeSeconds = 0;
+        let uptimeTicker = null;
+
+        // Dom references
+        const autorefreshSwitch = document.getElementById('autorefresh-switch');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const updateStatus = document.getElementById('update-status');
+        
+        const metricTotal = document.getElementById('metric-total');
+        const metricProcessed = document.getElementById('metric-processed');
+        const metricQuarantined = document.getElementById('metric-quarantined');
+        const metricUptime = document.getElementById('metric-uptime');
+        const metricProcPercent = document.getElementById('metric-proc-percent');
+        const metricQuarPercent = document.getElementById('metric-quar-percent');
+
+        const eventsTbody = document.getElementById('events-tbody');
+        const tableEmptyState = document.getElementById('table-empty-state');
+        const sourcesList = document.getElementById('sources-list');
+
+        const sysGoroutines = document.getElementById('sys-goroutines');
+        const sysAlloc = document.getElementById('sys-alloc');
+        const sysTotal = document.getElementById('sys-total');
+        const sysGc = document.getElementById('sys-gc');
+        const sysVersion = document.getElementById('sys-version');
+
+        const eventModal = document.getElementById('event-modal');
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+        const modalCopyBtn = document.getElementById('modal-copy-btn');
+        const modalSource = document.getElementById('modal-source');
+        const modalStatus = document.getElementById('modal-status');
+        const modalUrl = document.getElementById('modal-url');
+        const modalHash = document.getElementById('modal-hash');
+        const modalReasonContainer = document.getElementById('modal-reason-container');
+        const modalReason = document.getElementById('modal-reason');
+        const modalPayloadBytes = document.getElementById('modal-payload-bytes');
+        const modalPayloadContent = document.getElementById('modal-payload-content');
+
+        // Initial setup
+        function init() {
+            fetchStats();
+            
+            // Set refresh loops
+            setupAutoRefresh();
+            setupUptimeTicker();
+
+            // Event listeners
+            autorefreshSwitch.addEventListener('change', setupAutoRefresh);
+            modalCloseBtn.addEventListener('click', closeModal);
+            modalCopyBtn.addEventListener('click', copyPayloadToClipboard);
+            
+            // Close modal on click outside
+            eventModal.addEventListener('click', (e) => {
+                if (e.target === eventModal) closeModal();
+            });
+
+            // Close on escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeModal();
+            });
+        }
+
+        // Auto refresh setup
+        function setupAutoRefresh() {
+            if (autorefreshSwitch.checked) {
+                if (!refreshIntervalId) {
+                    refreshIntervalId = setInterval(fetchStats, 1000);
+                }
+            } else {
+                if (refreshIntervalId) {
+                    clearInterval(refreshIntervalId);
+                    refreshIntervalId = null;
+                }
+                updateStatus.textContent = 'Paused';
+            }
+        }
+
+        // Uptime counter
+        function setupUptimeTicker() {
+            if (!uptimeTicker) {
+                uptimeTicker = setInterval(() => {
+                    uptimeSeconds++;
+                    formatUptimeDisplay();
+                }, 1000);
+            }
+        }
+
+        function formatUptimeDisplay() {
+            const h = Math.floor(uptimeSeconds / 3600);
+            const m = Math.floor((uptimeSeconds % 3600) / 60);
+            const s = Math.floor(uptimeSeconds % 60);
+
+            let str = '';
+            if (h > 0) str += `${h}h `;
+            if (m > 0 || h > 0) str += `${m}m `;
+            str += `${s}s`;
+
+            metricUptime.textContent = str;
+        }
+
+        // Fetch Data from JSON REST API
+        async function fetchStats() {
+            loadingSpinner.classList.add('active');
+            updateStatus.textContent = 'Updating...';
+            try {
+                const response = await fetch('/api/stats');
+                if (!response.ok) {
+                    throw new Error(`HTTP error ${response.status}`);
+                }
+                const data = await response.json();
+                
+                updateUI(data);
+                
+                updateStatus.textContent = 'Connected';
+                document.getElementById('active-pulse').style.backgroundColor = 'var(--accent-green)';
+                document.getElementById('active-pulse').style.boxShadow = '0 0 10px var(--accent-green)';
+            } catch (err) {
+                console.error("Failed to fetch statistics:", err);
+                updateStatus.textContent = 'Connection Lost';
+                document.getElementById('active-pulse').style.backgroundColor = 'var(--accent-red)';
+                document.getElementById('active-pulse').style.boxShadow = '0 0 10px var(--accent-red)';
+            } finally {
+                loadingSpinner.classList.remove('active');
+            }
+        }
+
+        // Update UI panels with retrieved statistics
+        function updateUI(data) {
+            // Stats
+            animateValueChange(metricTotal, data.total_received);
+            animateValueChange(metricProcessed, data.total_processed);
+            animateValueChange(metricQuarantined, data.total_quarantined);
+            
+            uptimeSeconds = Math.round(data.uptime_seconds);
+            formatUptimeDisplay();
+
+            // Percentages
+            const total = data.total_received || 1;
+            const procPercent = ((data.total_processed / total) * 100).toFixed(1);
+            const quarPercent = ((data.total_quarantined / total) * 100).toFixed(1);
+            
+            metricProcPercent.textContent = `${procPercent}% of incoming streams`;
+            metricQuarPercent.textContent = `${quarPercent}% of incoming streams`;
+
+            // System info
+            sysGoroutines.textContent = data.system.num_goroutine;
+            sysAlloc.textContent = `${data.system.alloc_mb} MB`;
+            sysTotal.textContent = `${data.system.sys_mb} MB`;
+            sysGc.textContent = data.system.num_gc;
+            sysVersion.textContent = data.system.go_version;
+
+            // Sources List
+            updateSourcesPanel(data.source_metrics);
+
+            // Recent events Table
+            recentEvents = data.recent_events || [];
+            updateEventsTable();
+        }
+
+        function animateValueChange(element, newValue) {
+            const oldValue = parseInt(element.textContent.replace(/,/g, '')) || 0;
+            if (oldValue !== newValue) {
+                element.textContent = Number(newValue).toLocaleString();
+                element.style.transform = 'scale(1.05)';
+                setTimeout(() => {
+                    element.style.transform = 'scale(1)';
+                }, 150);
+            }
+        }
+
+        // Render Ingest Sources
+        const KNOWN_SOURCES = ['KALSHI', 'POLYMARKET', 'REUTERS', 'TWITTER'];
+        
+        function updateSourcesPanel(metrics) {
+            sourcesList.innerHTML = '';
+            
+            const sources = metrics ? Object.keys(metrics) : [];
+            const allSources = Array.from(new Set([...KNOWN_SOURCES, ...sources])).sort();
+
+            allSources.forEach(src => {
+                const metric = (metrics && metrics[src]) ? metrics[src] : {
+                    received_count: 0,
+                    processed_count: 0,
+                    quarantined_count: 0,
+                    last_event_time: null
+                };
+
+                const total = metric.received_count || 1;
+                const fillPercent = Math.round((metric.processed_count / total) * 100);
+
+                let lastSeen = 'Inactive';
+                if (metric.last_event_time) {
+                    const diffMs = new Date() - new Date(metric.last_event_time);
+                    const diffS = Math.round(diffMs / 1000);
+                    if (diffS < 5) lastSeen = 'Just now';
+                    else if (diffS < 60) lastSeen = `${diffS}s ago`;
+                    else lastSeen = `${Math.floor(diffS / 60)}m ago`;
+                }
+
+                const sourceCard = document.createElement('div');
+                sourceCard.className = 'source-card';
+                sourceCard.innerHTML = `
+                    <div class="source-header">
+                        <div class="source-name">
+                            <span class="source-badge ${src}">${src}</span>
+                        </div>
+                        <span class="source-last-time">${lastSeen}</span>
+                    </div>
+                    <div class="source-stats">
+                        <div class="source-stat-box">
+                            <div class="source-stat-label">Ingested</div>
+                            <div class="source-stat-val">${metric.received_count}</div>
+                        </div>
+                        <div class="source-stat-box">
+                            <div class="source-stat-label">Processed</div>
+                            <div class="source-stat-val processed">${metric.processed_count}</div>
+                        </div>
+                        <div class="source-stat-box">
+                            <div class="source-stat-label">Quar</div>
+                            <div class="source-stat-val quarantined">${metric.quarantined_count}</div>
+                        </div>
+                    </div>
+                    <div class="source-progress-bar">
+                        <div class="source-progress-fill" style="width: ${fillPercent}%"></div>
+                    </div>
+                `;
+                sourcesList.appendChild(sourceCard);
+            });
+        }
+
+        // Render Recent Events Table
+        function updateEventsTable() {
+            if (recentEvents.length === 0) {
+                eventsTbody.innerHTML = '';
+                tableEmptyState.style.display = 'flex';
+                return;
+            }
+
+            tableEmptyState.style.display = 'none';
+            eventsTbody.innerHTML = '';
+
+            recentEvents.forEach((ev, idx) => {
+                const tr = document.createElement('tr');
+                tr.setAttribute('data-index', idx);
+                tr.addEventListener('click', () => openEventInspector(idx));
+
+                const dateStr = new Date(ev.timestamp).toLocaleTimeString();
+                const statusBadge = ev.status === 'PROCESSED' 
+                    ? `<span class="badge processed">Processed</span>` 
+                    : `<span class="badge quarantined">Quarantined</span>`;
+
+                const shortHash = ev.payload_hash ? ev.payload_hash.substring(0, 12) + '...' : '-';
+                
+                tr.innerHTML = `
+                    <td>${dateStr}</td>
+                    <td><span class="source-badge ${ev.source_id}">${ev.source_id}</span></td>
+                    <td>${statusBadge}</td>
+                    <td class="url-cell" title="${ev.source_url || '-'}">${ev.source_url || '-'}</td>
+                    <td class="hash-cell" title="Click to inspect payload">${shortHash}</td>
+                `;
+                eventsTbody.appendChild(tr);
+            });
+        }
+
+        // Inspector Modal
+        function openEventInspector(index) {
+            const ev = recentEvents[index];
+            if (!ev) return;
+
+            modalSource.innerHTML = `<span class="source-badge ${ev.source_id}">${ev.source_id}</span>`;
+            modalStatus.innerHTML = ev.status === 'PROCESSED' 
+                ? `<span class="badge processed">Processed</span>` 
+                : `<span class="badge quarantined">Quarantined</span>`;
+            
+            modalUrl.textContent = ev.source_url || '-';
+            modalHash.textContent = ev.payload_hash || '-';
+            modalPayloadBytes.textContent = ev.length || 0;
+
+            if (ev.status === 'QUARANTINED') {
+                modalReason.textContent = ev.reason || 'Unknown validation failure';
+                modalReasonContainer.style.display = 'flex';
+            } else {
+                modalReasonContainer.style.display = 'none';
+            }
+
+            // Attempt to pretty format raw content if possible
+            let formattedContent = '';
+            try {
+                // If it looks like JSON, parse and pretty print
+                if (ev.raw_content && (ev.raw_content.startsWith('{') || ev.raw_content.startsWith('['))) {
+                    const parsed = JSON.parse(ev.raw_content);
+                    formattedContent = JSON.stringify(parsed, null, 2);
+                } else {
+                    formattedContent = ev.raw_content || '';
+                }
+            } catch (e) {
+                // Keep raw string if JSON parsing fails (e.g. is XML)
+                formattedContent = ev.raw_content || '';
+            }
+
+            modalPayloadContent.textContent = formattedContent;
+            
+            // Show Modal
+            eventModal.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Lock background scroll
+        }
+
+        function closeModal() {
+            eventModal.classList.remove('active');
+            document.body.style.overflow = ''; // Restore scroll
+        }
+
+        function copyPayloadToClipboard() {
+            const content = modalPayloadContent.textContent;
+            navigator.clipboard.writeText(content).then(() => {
+                const prevText = modalCopyBtn.textContent;
+                modalCopyBtn.textContent = 'Copied!';
+                modalCopyBtn.style.backgroundColor = 'var(--accent-green-glow)';
+                modalCopyBtn.style.color = 'var(--accent-green)';
+                setTimeout(() => {
+                    modalCopyBtn.textContent = prevText;
+                    modalCopyBtn.style.backgroundColor = '';
+                    modalCopyBtn.style.color = '';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+        }
+
+        // Initialize App
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

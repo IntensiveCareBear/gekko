@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gekko System Diagrams</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #21253a;
+    --border: #2d3148;
+    --accent: #6c7fff;
+    --accent2: #4ade80;
+    --accent3: #f59e0b;
+    --accent4: #f43f5e;
+    --accent5: #38bdf8;
+    --accent6: #a78bfa;
+    --text: #e2e8f0;
+    --muted: #6b7280;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    padding: 32px 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--accent);
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-bottom: 40px;
+  }
+  h2 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--accent5);
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 10px;
+  }
+  .section { margin-bottom: 60px; }
+
+  /* ─── COMPONENT DIAGRAM ─── */
+  .arch-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+  .arch-grid-wide {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+  .arch-full { margin-bottom: 24px; }
+
+  .comp {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    position: relative;
+  }
+  .comp-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .comp-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .comp-name {
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+  .comp-lang {
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-top: 1px;
+  }
+  .comp-desc {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-bottom: 12px;
+    line-height: 1.5;
+  }
+  .sub-list {
+    list-style: none;
+    font-size: 0.75rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .sub-list li {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 3px 8px;
+    color: var(--text);
+  }
+  .sub-list li.highlight { border-color: var(--accent); color: var(--accent); }
+
+  .infra-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+  .infra-comp {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    text-align: center;
+  }
+  .infra-comp .icon { font-size: 26px; margin-bottom: 8px; }
+  .infra-comp .name { font-weight: 600; font-size: 0.85rem; margin-bottom: 4px; }
+  .infra-comp .detail { font-size: 0.72rem; color: var(--muted); }
+
+  /* flow arrows */
+  .flow-diagram {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    overflow-x: auto;
+  }
+  .flow-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 16px;
+    flex-wrap: nowrap;
+  }
+  .flow-node {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    white-space: nowrap;
+    text-align: center;
+    min-width: 110px;
+  }
+  .flow-arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 6px;
+    flex-shrink: 0;
+  }
+  .flow-arrow .line {
+    height: 2px;
+    width: 48px;
+    background: var(--border);
+    position: relative;
+  }
+  .flow-arrow .line::after {
+    content: '▶';
+    position: absolute;
+    right: -7px;
+    top: -9px;
+    font-size: 10px;
+    color: var(--muted);
+  }
+  .flow-label {
+    font-size: 0.62rem;
+    color: var(--accent3);
+    margin-top: 3px;
+    white-space: nowrap;
+  }
+
+  /* color variants */
+  .c-blue  { background: rgba(108,127,255,0.12); border-color: #6c7fff55; }
+  .c-green { background: rgba(74,222,128,0.10); border-color: #4ade8055; }
+  .c-amber { background: rgba(245,158,11,0.10); border-color: #f59e0b55; }
+  .c-rose  { background: rgba(244,63,94,0.10);  border-color: #f43f5e55; }
+  .c-sky   { background: rgba(56,189,248,0.10); border-color: #38bdf855; }
+  .c-purple{ background: rgba(167,139,250,0.10);border-color: #a78bfa55; }
+
+  .icon-blue   { background: rgba(108,127,255,0.2); color: #6c7fff; }
+  .icon-green  { background: rgba(74,222,128,0.2);  color: #4ade80; }
+  .icon-amber  { background: rgba(245,158,11,0.2);  color: #f59e0b; }
+  .icon-rose   { background: rgba(244,63,94,0.2);   color: #f43f5e; }
+  .icon-sky    { background: rgba(56,189,248,0.2);  color: #38bdf8; }
+  .icon-purple { background: rgba(167,139,250,0.2); color: #a78bfa; }
+
+  /* ─── SCHEMA DIAGRAM ─── */
+  .schema-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+  .schema-grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+  .schema-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .schema-header {
+    padding: 12px 16px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .schema-db-label {
+    margin-left: auto;
+    font-size: 0.65rem;
+    font-weight: 400;
+    opacity: 0.7;
+    border: 1px solid currentColor;
+    border-radius: 4px;
+    padding: 1px 6px;
+  }
+  .schema-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.75rem;
+  }
+  .schema-table th {
+    padding: 6px 16px;
+    text-align: left;
+    color: var(--muted);
+    font-weight: 500;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+  .schema-table td {
+    padding: 6px 16px;
+    border-bottom: 1px solid var(--border)44;
+    vertical-align: top;
+  }
+  .schema-table tr:last-child td { border-bottom: none; }
+  .field-name { font-family: 'SF Mono', 'Fira Code', monospace; color: var(--text); }
+  .field-type { color: var(--accent3); font-family: 'SF Mono', 'Fira Code', monospace; }
+  .field-note { color: var(--muted); font-size: 0.7rem; }
+  .pk { color: var(--accent4); font-size: 0.65rem; border: 1px solid var(--accent4)88; border-radius: 3px; padding: 0 4px; margin-left: 4px; }
+  .fk { color: var(--accent5); font-size: 0.65rem; border: 1px solid var(--accent5)88; border-radius: 3px; padding: 0 4px; margin-left: 4px; }
+
+  .redis-section { margin-bottom: 20px; }
+  .redis-key {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.72rem;
+    color: var(--accent);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 4px 10px;
+    margin: 8px 16px 0;
+    display: inline-block;
+  }
+  .redis-key-desc {
+    font-size: 0.7rem;
+    color: var(--muted);
+    padding: 2px 16px 10px;
+  }
+
+  .kafka-topic {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border)44;
+  }
+  .kafka-topic:last-child { border-bottom: none; }
+  .topic-pill {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.72rem;
+    color: var(--accent3);
+    background: rgba(245,158,11,0.1);
+    border: 1px solid rgba(245,158,11,0.3);
+    border-radius: 5px;
+    padding: 3px 8px;
+    white-space: nowrap;
+  }
+  .topic-detail { font-size: 0.72rem; color: var(--muted); }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 12px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+  }
+  .tab-bar {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0;
+  }
+  .tab {
+    padding: 8px 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    color: var(--muted);
+    transition: all 0.15s;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+</style>
+</head>
+<body>
+
+<h1>Gekko System Diagrams</h1>
+<p class="subtitle">Architecture overview and data schemas · Auto-generated from source</p>
+
+<div class="tab-bar">
+  <button class="tab active" onclick="switchTab('arch')">Component Architecture</button>
+  <button class="tab" onclick="switchTab('flow')">Data Flow</button>
+  <button class="tab" onclick="switchTab('schema')">Database Schemas</button>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  TAB 1: COMPONENT ARCHITECTURE                                -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div id="tab-arch" class="tab-content active">
+
+  <div class="section">
+    <h2>Services</h2>
+    <div class="arch-grid">
+
+      <!-- Kahuna -->
+      <div class="comp c-amber">
+        <div class="comp-header">
+          <div class="comp-icon icon-amber">📥</div>
+          <div>
+            <div class="comp-name">Kahuna</div>
+            <div class="comp-lang">Go · Ingestion Pipeline</div>
+          </div>
+        </div>
+        <div class="comp-desc">Multi-source news &amp; market event ingester with compliance filtering, quarantine, and Kafka publishing.</div>
+        <ul class="sub-list">
+          <li>Kalshi WebSocket</li>
+          <li>Polymarket WebSocket</li>
+          <li>Reuters RSS</li>
+          <li>Twitter API</li>
+          <li class="highlight">Gatekeeper (filter)</li>
+          <li class="highlight">Quarantiner</li>
+          <li class="highlight">Kafka Producer</li>
+          <li>Monitor Dashboard</li>
+        </ul>
+      </div>
+
+      <!-- Gordon -->
+      <div class="comp c-blue">
+        <div class="comp-header">
+          <div class="comp-icon icon-blue">🧠</div>
+          <div>
+            <div class="comp-name">Gordon</div>
+            <div class="comp-lang">Go · Strategy Engine</div>
+          </div>
+        </div>
+        <div class="comp-desc">LLM-powered trading strategy generator. Embeds news into Qdrant, matches markets, enriches with signals, proposes trades via personas.</div>
+        <ul class="sub-list">
+          <li class="highlight">Ollama LLM Client</li>
+          <li class="highlight">Qdrant RAG Client</li>
+          <li>Market Matcher</li>
+          <li>Signal Enrichment</li>
+          <li>Econ Calendar</li>
+          <li class="highlight">Personas (5 types)</li>
+          <li>Impact Estimator</li>
+          <li>RAG Feedback Loop</li>
+          <li>Kafka Consumer/Producer</li>
+        </ul>
+      </div>
+
+      <!-- Executive Core -->
+      <div class="comp c-green">
+        <div class="comp-header">
+          <div class="comp-icon icon-green">⚡</div>
+          <div>
+            <div class="comp-name">Executive Core</div>
+            <div class="comp-lang">Go · Order Management</div>
+          </div>
+        </div>
+        <div class="comp-desc">Consumes proposals, runs risk gates, consensus engine, and adaptive allocator, then routes orders via broker Unix socket.</div>
+        <ul class="sub-list">
+          <li class="highlight">Position Tracker</li>
+          <li class="highlight">Consensus Engine</li>
+          <li class="highlight">Adaptive Allocator</li>
+          <li>Risk Gate</li>
+          <li class="highlight">Immutable Ledger</li>
+          <li>Account / NAV</li>
+          <li>Benchmark Tracker</li>
+          <li>Run Exporter (CSV)</li>
+          <li>Broker Client (socket)</li>
+        </ul>
+      </div>
+
+      <!-- Broker Worker -->
+      <div class="comp c-rose">
+        <div class="comp-header">
+          <div class="comp-icon icon-rose">🔗</div>
+          <div>
+            <div class="comp-name">Broker Worker</div>
+            <div class="comp-lang">Go · Exchange Connector</div>
+          </div>
+        </div>
+        <div class="comp-desc">Token-authenticated Unix-socket server. Routes trade intents to Kalshi (RSA-signed REST) or Polymarket (CLOB API).</div>
+        <ul class="sub-list">
+          <li class="highlight">Unix Socket Server</li>
+          <li>Token Auth</li>
+          <li class="highlight">Kalshi REST API</li>
+          <li class="highlight">Polymarket CLOB</li>
+          <li>Health Endpoint :8090</li>
+        </ul>
+      </div>
+
+      <!-- Marketdata -->
+      <div class="comp c-sky">
+        <div class="comp-header">
+          <div class="comp-icon icon-sky">📊</div>
+          <div>
+            <div class="comp-name">Marketdata</div>
+            <div class="comp-lang">Go · Read-Only Poller</div>
+          </div>
+        </div>
+        <div class="comp-desc">Polls Kalshi + Polymarket order books (read-only keys), writes to Redis for Gordon and Executive Core to consume.</div>
+        <ul class="sub-list">
+          <li>Kalshi REST (read-only)</li>
+          <li>Polymarket REST</li>
+          <li class="highlight">Redis Writer</li>
+          <li>Market Discovery</li>
+          <li>Momentum Signals</li>
+          <li>Health Endpoint :8093</li>
+        </ul>
+      </div>
+
+      <!-- Frontend -->
+      <div class="comp c-purple">
+        <div class="comp-header">
+          <div class="comp-icon icon-purple">🖥️</div>
+          <div>
+            <div class="comp-name">Frontend</div>
+            <div class="comp-lang">React/TypeScript · Vite</div>
+          </div>
+        </div>
+        <div class="comp-desc">Dashboard UI for monitoring positions, P&amp;L, ledger audit, model controls, and system health.</div>
+        <ul class="sub-list">
+          <li>Dashboard</li>
+          <li>PnL Hero</li>
+          <li>Portfolio Analytics</li>
+          <li>Ledger Audit</li>
+          <li>Model Controls</li>
+          <li>System Status / Telemetry</li>
+          <li>Persona Scorecard</li>
+          <li>Glossary Tooltips</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <h2>Infrastructure</h2>
+    <div class="infra-grid">
+      <div class="infra-comp c-amber">
+        <div class="icon">📨</div>
+        <div class="name">Apache Kafka</div>
+        <div class="detail">KRaft mode · 2 topics<br>kahuna.ingest.public<br>gordon.strategies.proposed</div>
+      </div>
+      <div class="infra-comp c-rose">
+        <div class="icon">🔴</div>
+        <div class="name">Redis</div>
+        <div class="detail">AOF + RDB persistence<br>Order books · Account state<br>Persona stats · Alloc weights</div>
+      </div>
+      <div class="infra-comp c-blue">
+        <div class="icon">🔍</div>
+        <div class="name">Qdrant</div>
+        <div class="detail">Vector DB · 768-dim cosine<br>News event embeddings<br>Market title embeddings</div>
+      </div>
+      <div class="infra-comp c-purple">
+        <div class="icon">🤖</div>
+        <div class="name">Ollama</div>
+        <div class="detail">Local LLM inference<br>Proposal generation<br>Text embeddings</div>
+      </div>
+    </div>
+
+    <h2>Gordon Personas</h2>
+    <div class="arch-grid">
+      <div class="comp" style="padding:14px;">
+        <table style="width:100%; font-size:0.75rem; border-collapse:collapse;">
+          <thead>
+            <tr style="color:var(--muted); border-bottom:1px solid var(--border);">
+              <th style="padding:4px 8px; text-align:left;">ID</th>
+              <th style="padding:4px 8px; text-align:left;">Stance</th>
+              <th style="padding:4px 8px; text-align:left;">Risk</th>
+              <th style="padding:4px 8px; text-align:left;">Threshold</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td style="padding:4px 8px;"><code style="color:var(--accent)">gordon-default</code></td><td style="padding:4px 8px;">Neutral</td><td style="padding:4px 8px;">Balanced</td><td style="padding:4px 8px;">0.50</td></tr>
+            <tr><td style="padding:4px 8px;"><code style="color:var(--accent4)">bull</code></td><td style="padding:4px 8px;">Bullish</td><td style="padding:4px 8px;">Aggressive</td><td style="padding:4px 8px;">0.45</td></tr>
+            <tr><td style="padding:4px 8px;"><code style="color:var(--accent2)">cautious-bull</code></td><td style="padding:4px 8px;">Bullish</td><td style="padding:4px 8px;">Conservative</td><td style="padding:4px 8px;">0.60</td></tr>
+            <tr><td style="padding:4px 8px;"><code style="color:var(--accent3)">bear</code></td><td style="padding:4px 8px;">Bearish</td><td style="padding:4px 8px;">Balanced</td><td style="padding:4px 8px;">0.55</td></tr>
+            <tr><td style="padding:4px 8px;"><code style="color:var(--accent3)">cautious-bear</code></td><td style="padding:4px 8px;">Bearish</td><td style="padding:4px 8px;">Conservative</td><td style="padding:4px 8px;">0.65</td></tr>
+            <tr><td style="padding:4px 8px;"><code style="color:var(--accent4)">aggressive-bear</code></td><td style="padding:4px 8px;">Bearish</td><td style="padding:4px 8px;">Aggressive</td><td style="padding:4px 8px;">0.45</td></tr>
+            <tr><td style="padding:4px 8px;"><code style="color:var(--accent5)">neutral</code></td><td style="padding:4px 8px;">Neutral</td><td style="padding:4px 8px;">Balanced</td><td style="padding:4px 8px;">0.50</td></tr>
+            <tr><td style="padding:4px 8px;"><code style="color:var(--accent5)">conservative-neutral</code></td><td style="padding:4px 8px;">Neutral</td><td style="padding:4px 8px;">Conservative</td><td style="padding:4px 8px;">0.65</td></tr>
+            <tr><td style="padding:4px 8px;"><code style="color:var(--accent6)">aggressive-neutral</code></td><td style="padding:4px 8px;">Neutral</td><td style="padding:4px 8px;">Aggressive</td><td style="padding:4px 8px;">0.40</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="comp c-blue" style="grid-column: span 2; padding:14px;">
+        <div style="font-size:0.78rem; color:var(--muted); line-height:1.6;">
+          <strong style="color:var(--text);">Persona fleet:</strong> Multiple Gordon instances run concurrently with different personas. Each consumes from <code style="color:var(--accent3)">kahuna.ingest.public</code>, generates an LLM proposal, and publishes to <code style="color:var(--accent3)">gordon.strategies.proposed</code>. The Executive Core's <strong style="color:var(--text);">Consensus Engine</strong> buffers BUY proposals within a short time window and consolidates competing persona opinions into a single weighted order. SELL proposals bypass consensus and execute immediately. The <strong style="color:var(--text);">Adaptive Allocator</strong> (Phase 4) learns per-persona win rates via EWMA and adjusts consensus weights over time.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  TAB 2: DATA FLOW                                             -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div id="tab-flow" class="tab-content">
+  <div class="section">
+    <h2>End-to-End Data Flow</h2>
+    <div class="flow-diagram">
+
+      <div style="font-size:0.72rem; color:var(--muted); margin-bottom:16px;">① Ingest path — news &amp; market events</div>
+      <div class="flow-row">
+        <div class="flow-node c-amber">Kalshi WS<br><span style="color:var(--muted);font-weight:400">Polymarket WS</span><br><span style="color:var(--muted);font-weight:400">Reuters RSS</span><br><span style="color:var(--muted);font-weight:400">Twitter API</span></div>
+        <div class="flow-arrow"><div class="line"></div><div class="flow-label">raw events</div></div>
+        <div class="flow-node c-amber">Kahuna<br><span style="color:var(--muted);font-weight:400;font-size:0.7rem">Gatekeeper<br>Quarantine</span></div>
+        <div class="flow-arrow"><div class="line"></div><div class="flow-label">GekkoIngestEvent</div></div>
+        <div class="flow-node" style="border-color:#f59e0b88; color:var(--accent3);">Kafka<br><span style="font-size:0.68rem; font-weight:400;">kahuna.ingest.public</span></div>
+        <div class="flow-arrow"><div class="line"></div><div class="flow-label">fan-out</div></div>
+        <div class="flow-node c-blue">Gordon ×N<br><span style="color:var(--muted);font-weight:400;font-size:0.7rem">persona fleet</span></div>
+        <div class="flow-arrow"><div class="line"></div><div class="flow-label">also consumed by</div></div>
+        <div class="flow-node c-green">Executive Core<br><span style="color:var(--muted);font-weight:400;font-size:0.7rem">(direct display)</span></div>
+      </div>
+
+      <div style="font-size:0.72rem; color:var(--muted); margin: 20px 0 16px;">② Strategy proposal path — LLM → consensus → risk gate</div>
+      <div class="flow-row">
+        <div class="flow-node c-blue">Gordon</div>
+        <div class="flow-arrow"><div class="line"></div><div class="flow-label">embed news<br>→ Qdrant RAG</div></div>
+        <div class="flow-node" style="border-color:#6c7fff55; color:var(--accent);">Qdrant<br><span style="font-size:0.68rem; font-weight:400;">cosine match</span></div>
+        <div class="flow-arrow"><div class="line"></div><div class="flow-label">matched contract</div></div>
+        <div class="flow-node c-blue">Ollama LLM<br><span style="font-size:0.68rem;font-weight:400;">proposal JSON</span></div>
+        <div class="flow-arrow"><div class="line"></div><div class="flow-label">StrategyProposal</div></div>
+        <div class="flow-node" style="border-color:#f59e0b88; color:var(--accent3);">Kafka<br><span style="font-size:0.68rem; font-weight:400;">gordon.strategies.proposed</span></div>
+        <div class="flow-arrow"><div class="line"></div><div class="flow-label">consume</div></div>
+        <div class="flow-node c-green">Executive Core</div>
+      </div>
+
+      <div style="font-size:0.72rem; color:var(--muted); margin: 20px 0 16px;">③ Order execution path — executive → broker → exchange</div>
+      <div class="flow-row">
+        <div class="flow-node c-green">Executive Core<br><span style="font-size:0.68rem;font-weight:400;">Consensus Engine<br>Adaptive Allocator<br>Risk Gate</span></div>
+        <div class="flow-arrow"><div class="line"></div><div class="flow-label">TradeIntent<br>(Unix socket)</div></div>
+        <div class="flow-node c-rose">Broker Worker<br><span style="font-size:0.68rem;font-weight:400;">token auth</span></div>
+        <div class="flow-arrow"><div class="line"></div><div class="flow-label">Kalshi REST<br>(RSA-signed)</div></div>
+        <div class="flow-node" style="border-color:#f43f5e55; color:var(--accent4);">Kalshi<br>Exchange</div>
+        <div style="padding: 0 16px; color:var(--muted); font-size:0.8rem;">or</div>
+        <div class="flow-node" style="border-color:#38bdf855; color:var(--accent5);">Polymarket<br>CLOB</div>
+      </div>
+      <div class="flow-row" style="margin-top:8px; padding-left: 0;">
+        <div class="flow-node c-green" style="min-width:80px;">Executive Core</div>
+        <div class="flow-arrow"><div class="line"></div><div class="flow-label">append block</div></div>
+        <div class="flow-node" style="border-color:#4ade8055; color:var(--accent2);">ledger.db<br><span style="font-size:0.68rem;font-weight:400;">hash-chained</span></div>
+        <div class="flow-arrow" style="margin-left:16px;"><div class="line"></div><div class="flow-label">NAV / positions</div></div>
+        <div class="flow-node" style="border-color:#f43f5e55; color:var(--accent4);">Redis<br><span style="font-size:0.68rem;font-weight:400;">account state</span></div>
+      </div>
+
+      <div style="font-size:0.72rem; color:var(--muted); margin: 20px 0 16px;">④ Market data path — read-only polling → Redis</div>
+      <div class="flow-row">
+        <div class="flow-node c-sky">Marketdata<br><span style="font-size:0.68rem;font-weight:400;">Kalshi REST (RO)<br>Polymarket REST</span></div>
+        <div class="flow-arrow"><div class="line"></div><div class="flow-label">orderbook:*<br>market:*<br>momentum signals</div></div>
+        <div class="flow-node" style="border-color:#f43f5e55; color:var(--accent4);">Redis</div>
+        <div class="flow-arrow"><div class="line"></div><div class="flow-label">read</div></div>
+        <div class="flow-node c-blue">Gordon<br><span style="font-size:0.68rem;font-weight:400;">Market Matcher<br>Signals</span></div>
+        <div style="padding: 0 12px; color:var(--muted);">+</div>
+        <div class="flow-node c-green">Executive Core<br><span style="font-size:0.68rem;font-weight:400;">mark prices<br>live NAV</span></div>
+      </div>
+
+      <div style="font-size:0.72rem; color:var(--muted); margin: 20px 0 16px;">⑤ RAG feedback loop — closed trades reinforce Qdrant</div>
+      <div class="flow-row">
+        <div class="flow-node c-green">Executive Core</div>
+        <div class="flow-arrow"><div class="line"></div><div class="flow-label">RAGFeedback<br>via Redis stream</div></div>
+        <div class="flow-node c-blue">Gordon<br><span style="font-size:0.68rem;font-weight:400;">RunRAGFeedbackConsumer</span></div>
+        <div class="flow-arrow"><div class="line"></div><div class="flow-label">embed outcome</div></div>
+        <div class="flow-node" style="border-color:#6c7fff55; color:var(--accent);">Qdrant<br><span style="font-size:0.68rem;font-weight:400;">upsert with result</span></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  TAB 3: DATABASE SCHEMAS                                       -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div id="tab-schema" class="tab-content">
+  <div class="section">
+
+    <!-- Ledger -->
+    <h2>ledger.db — Immutable Hash-Chained Ledger (JSONL file)</h2>
+    <div class="schema-grid" style="grid-template-columns: 1fr;">
+      <div class="schema-card">
+        <div class="schema-header c-green" style="color:var(--accent2);">
+          TransactionBlock
+          <span class="schema-db-label">ledger.db (append-only JSONL)</span>
+        </div>
+        <table class="schema-table">
+          <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td class="field-name">tx_id <span class="pk">PK</span></td><td class="field-type">uint64</td><td class="field-note">Auto-incrementing block number</td></tr>
+            <tr><td class="field-name">timestamp</td><td class="field-type">time.Time</td><td class="field-note">UTC wall time of the write</td></tr>
+            <tr><td class="field-name">contract_id</td><td class="field-type">string</td><td class="field-note">Kalshi/Polymarket ticker (e.g. KXBTCD-24Q4)</td></tr>
+            <tr><td class="field-name">action</td><td class="field-type">string</td><td class="field-note">BUY | SELL</td></tr>
+            <tr><td class="field-name">size</td><td class="field-type">int</td><td class="field-note">Number of contracts</td></tr>
+            <tr><td class="field-name">price</td><td class="field-type">float64</td><td class="field-note">Fill price (0–1 probability)</td></tr>
+            <tr><td class="field-name">status</td><td class="field-type">string</td><td class="field-note">DRY_OPEN · DRY_FILLED · DRY_CLOSED · LIVE_OPEN · LIVE_FILLED · LIVE_CLOSED · DENIED</td></tr>
+            <tr><td class="field-name">yield_delta</td><td class="field-type">float64</td><td class="field-note">Realized P&amp;L on close (omitted on open)</td></tr>
+            <tr><td class="field-name">broker_tx_id</td><td class="field-type">string</td><td class="field-note">Exchange-assigned order ID (live mode)</td></tr>
+            <tr><td class="field-name">prev_hash</td><td class="field-type">string</td><td class="field-note">SHA-256 of previous block (genesis = 000...0)</td></tr>
+            <tr><td class="field-name">hash</td><td class="field-type">string</td><td class="field-note">SHA-256 of this block's fields — tamper-detection</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Redis schemas -->
+    <h2>Redis — In-Memory / Persisted State</h2>
+    <div class="schema-grid">
+
+      <div class="schema-card">
+        <div class="schema-header c-rose" style="color:var(--accent4);">
+          Account &amp; Equity State
+          <span class="schema-db-label">Redis (AOF+RDB)</span>
+        </div>
+        <div class="redis-key">gekko:account</div>
+        <div class="redis-key-desc">JSON · AccountState snapshot (updated every SnapshotInterval)</div>
+        <table class="schema-table">
+          <thead><tr><th>Field</th><th>Type</th></tr></thead>
+          <tbody>
+            <tr><td class="field-name">starting_capital</td><td class="field-type">float64</td></tr>
+            <tr><td class="field-name">cash</td><td class="field-type">float64</td></tr>
+            <tr><td class="field-name">nav</td><td class="field-type">float64</td></tr>
+            <tr><td class="field-name">realized_pnl</td><td class="field-type">float64</td></tr>
+            <tr><td class="field-name">unrealized_pnl</td><td class="field-type">float64</td></tr>
+            <tr><td class="field-name">open_positions</td><td class="field-type">int</td></tr>
+            <tr><td class="field-name">peak_nav</td><td class="field-type">float64</td></tr>
+            <tr><td class="field-name">drawdown_pct</td><td class="field-type">float64</td></tr>
+            <tr><td class="field-name">updated_at_ms</td><td class="field-type">int64</td></tr>
+          </tbody>
+        </table>
+
+        <div class="redis-key">gekko:equity_curve</div>
+        <div class="redis-key-desc">JSON array · up to 5,000 EquityPoint samples</div>
+        <table class="schema-table">
+          <thead><tr><th>Field</th><th>Type</th></tr></thead>
+          <tbody>
+            <tr><td class="field-name">timestamp_ms</td><td class="field-type">int64</td></tr>
+            <tr><td class="field-name">nav</td><td class="field-type">float64</td></tr>
+            <tr><td class="field-name">cash</td><td class="field-type">float64</td></tr>
+            <tr><td class="field-name">realized_pnl</td><td class="field-type">float64</td></tr>
+            <tr><td class="field-name">unrealized_pnl</td><td class="field-type">float64</td></tr>
+            <tr><td class="field-name">open_positions</td><td class="field-type">int</td></tr>
+            <tr><td class="field-name">drawdown_pct</td><td class="field-type">float64</td></tr>
+            <tr><td class="field-name">benchmark_nav</td><td class="field-type">float64?</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="schema-card">
+        <div class="schema-header c-sky" style="color:var(--accent5);">
+          Positions &amp; Trades
+          <span class="schema-db-label">Redis (AOF+RDB)</span>
+        </div>
+
+        <div class="redis-key">gekko:positions</div>
+        <div class="redis-key-desc">JSON map[contract_id → Position] · live open positions</div>
+        <table class="schema-table">
+          <thead><tr><th>Field</th><th>Type</th></tr></thead>
+          <tbody>
+            <tr><td class="field-name">contract_id <span class="pk">KEY</span></td><td class="field-type">string</td></tr>
+            <tr><td class="field-name">entry_price</td><td class="field-type">float64</td></tr>
+            <tr><td class="field-name">size</td><td class="field-type">int</td></tr>
+            <tr><td class="field-name">timestamp</td><td class="field-type">time.Time</td></tr>
+            <tr><td class="field-name">expiry</td><td class="field-type">time.Time</td></tr>
+            <tr><td class="field-name">persona</td><td class="field-type">string</td></tr>
+            <tr><td class="field-name">strategy_id</td><td class="field-type">string</td></tr>
+            <tr><td class="field-name">contributors</td><td class="field-type">[]string</td></tr>
+            <tr><td class="field-name">contributor_proposals</td><td class="field-type">[]ContributorProposal</td></tr>
+          </tbody>
+        </table>
+
+        <div class="redis-key">gekko:trades</div>
+        <div class="redis-key-desc">JSON array · up to 1,000 ClosedTrade records</div>
+        <table class="schema-table">
+          <thead><tr><th>Field</th><th>Type</th></tr></thead>
+          <tbody>
+            <tr><td class="field-name">contract_id</td><td class="field-type">string</td></tr>
+            <tr><td class="field-name">entry_price / exit_price</td><td class="field-type">float64</td></tr>
+            <tr><td class="field-name">size</td><td class="field-type">int</td></tr>
+            <tr><td class="field-name">side</td><td class="field-type">string</td></tr>
+            <tr><td class="field-name">realized_pnl / return_pct</td><td class="field-type">float64</td></tr>
+            <tr><td class="field-name">status</td><td class="field-type">string</td></tr>
+            <tr><td class="field-name">persona / exchange</td><td class="field-type">string</td></tr>
+            <tr><td class="field-name">closed_at</td><td class="field-type">time.Time</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="schema-card">
+        <div class="schema-header c-blue" style="color:var(--accent);">
+          Order Books &amp; Market Catalog
+          <span class="schema-db-label">Redis (TTL 30s)</span>
+        </div>
+
+        <div class="redis-key">orderbook:&lt;ticker&gt;</div>
+        <div class="redis-key-desc">JSON · written by Marketdata, read by Gordon + Executive Core</div>
+        <table class="schema-table">
+          <thead><tr><th>Field</th><th>Type</th></tr></thead>
+          <tbody>
+            <tr><td class="field-name">contract_id</td><td class="field-type">string</td></tr>
+            <tr><td class="field-name">bids</td><td class="field-type">[]PriceLevel</td></tr>
+            <tr><td class="field-name">asks</td><td class="field-type">[]PriceLevel</td></tr>
+            <tr><td class="field-name">  └ price</td><td class="field-type">float64</td></tr>
+            <tr><td class="field-name">  └ volume</td><td class="field-type">int</td></tr>
+          </tbody>
+        </table>
+
+        <div class="redis-key">market:&lt;ticker&gt;</div>
+        <div class="redis-key-desc">JSON · market status (open/closed/settled)</div>
+
+        <div class="redis-key">gekko:kalshi_markets</div>
+        <div class="redis-key-desc">JSON array · full market catalog for Market Matcher embedding</div>
+        <table class="schema-table">
+          <thead><tr><th>Field</th><th>Type</th></tr></thead>
+          <tbody>
+            <tr><td class="field-name">ticker</td><td class="field-type">string</td></tr>
+            <tr><td class="field-name">title</td><td class="field-type">string</td></tr>
+            <tr><td class="field-name">yes_bid / yes_ask</td><td class="field-type">float64</td></tr>
+            <tr><td class="field-name">volume</td><td class="field-type">float64</td></tr>
+            <tr><td class="field-name">status / event</td><td class="field-type">string</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="schema-card">
+        <div class="schema-header c-purple" style="color:var(--accent6);">
+          Persona Stats &amp; Adaptive Allocator
+          <span class="schema-db-label">Redis (AOF+RDB)</span>
+        </div>
+
+        <div class="redis-key">gekko:persona_stats</div>
+        <div class="redis-key-desc">JSON · per-persona performance counters</div>
+        <table class="schema-table">
+          <thead><tr><th>Field</th><th>Type</th></tr></thead>
+          <tbody>
+            <tr><td class="field-name">persona_id <span class="pk">KEY</span></td><td class="field-type">string</td></tr>
+            <tr><td class="field-name">total_trades</td><td class="field-type">int</td></tr>
+            <tr><td class="field-name">wins / losses</td><td class="field-type">int</td></tr>
+            <tr><td class="field-name">total_pnl</td><td class="field-type">float64</td></tr>
+            <tr><td class="field-name">win_rate</td><td class="field-type">float64</td></tr>
+          </tbody>
+        </table>
+
+        <div class="redis-key">gekko:persona_alloc</div>
+        <div class="redis-key-desc">JSON · Adaptive Allocator EWMA bandit state (persists across restarts)</div>
+        <table class="schema-table">
+          <thead><tr><th>Field</th><th>Type</th></tr></thead>
+          <tbody>
+            <tr><td class="field-name">score</td><td class="field-type">map[string]float64</td></tr>
+            <tr><td class="field-name">count</td><td class="field-type">map[string]int</td></tr>
+          </tbody>
+        </table>
+
+        <div class="redis-key">gekko:model_controls</div>
+        <div class="redis-key-desc">JSON · live model control knob (stance / risk / threshold) for the default Gordon persona</div>
+
+        <div class="redis-key">gekko:pending_proposal</div>
+        <div class="redis-key-desc">JSON · current unconfirmed proposal awaiting manual approval</div>
+
+        <div class="redis-key">gekko:rag_feedback</div>
+        <div class="redis-key-desc">Redis stream · closed-trade outcomes for Gordon's RAG feedback consumer</div>
+      </div>
+
+    </div>
+
+    <!-- Kafka schemas -->
+    <h2>Kafka Topics</h2>
+    <div class="schema-grid">
+      <div class="schema-card">
+        <div class="schema-header c-amber" style="color:var(--accent3);">
+          kahuna.ingest.public
+          <span class="schema-db-label">Kafka topic</span>
+        </div>
+        <div style="padding:10px 16px; font-size:0.72rem; color:var(--muted);">Producer: Kahuna · Consumers: Gordon ×N, Executive Core</div>
+        <table class="schema-table">
+          <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td class="field-name">SourceID</td><td class="field-type">string</td><td class="field-note">Deduplication key</td></tr>
+            <tr><td class="field-name">RawContent</td><td class="field-type">string</td><td class="field-note">Full article / event text</td></tr>
+            <tr><td class="field-name">SourceURL</td><td class="field-type">string</td><td class="field-note">Originating URL</td></tr>
+            <tr><td class="field-name">ExtractedTimestampNS</td><td class="field-type">int64</td><td class="field-note">Nanosecond epoch</td></tr>
+            <tr><td class="field-name">PayloadHash</td><td class="field-type">string</td><td class="field-note">SHA-256 content hash</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="schema-card">
+        <div class="schema-header c-amber" style="color:var(--accent3);">
+          gordon.strategies.proposed
+          <span class="schema-db-label">Kafka topic</span>
+        </div>
+        <div style="padding:10px 16px; font-size:0.72rem; color:var(--muted);">Producer: Gordon ×N · Consumer: Executive Core</div>
+        <table class="schema-table">
+          <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td class="field-name">contract_id</td><td class="field-type">string</td><td class="field-note">Market ticker to trade</td></tr>
+            <tr><td class="field-name">action</td><td class="field-type">string</td><td class="field-note">BUY | SELL</td></tr>
+            <tr><td class="field-name">size</td><td class="field-type">int</td><td class="field-note">Proposed contract quantity</td></tr>
+            <tr><td class="field-name">max_price</td><td class="field-type">float64</td><td class="field-note">Worst acceptable fill</td></tr>
+            <tr><td class="field-name">confidence</td><td class="field-type">float64</td><td class="field-note">Composite signal [0,1]</td></tr>
+            <tr><td class="field-name">rationale</td><td class="field-type">string</td><td class="field-note">LLM free-text reason</td></tr>
+            <tr><td class="field-name">persona</td><td class="field-type">string</td><td class="field-note">Originating persona ID</td></tr>
+            <tr><td class="field-name">strategy_id</td><td class="field-type">string</td><td class="field-note">UUID for deduplication</td></tr>
+            <tr><td class="field-name">event_hash</td><td class="field-type">string</td><td class="field-note">News event key for consensus grouping</td></tr>
+            <tr><td class="field-name">exchange</td><td class="field-type">string</td><td class="field-note">kalshi | polymarket</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Qdrant schema -->
+    <h2>Qdrant — Vector Store</h2>
+    <div class="schema-grid">
+      <div class="schema-card">
+        <div class="schema-header c-blue" style="color:var(--accent);">
+          Default Collection (News Events + RAG Outcomes)
+          <span class="schema-db-label">Qdrant · 768-dim cosine</span>
+        </div>
+        <div style="padding:10px 16px; font-size:0.72rem; color:var(--muted);">Each point = one news event embedded by Ollama. Queried by Gordon to find similar past events and their trade outcomes.</div>
+        <table class="schema-table">
+          <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td class="field-name">id <span class="pk">PK</span></td><td class="field-type">UUID</td><td class="field-note">Random point ID</td></tr>
+            <tr><td class="field-name">vector</td><td class="field-type">[768]float32</td><td class="field-note">Ollama nomic-embed-text embedding</td></tr>
+            <tr><td class="field-name">payload.contract_id</td><td class="field-type">string</td><td class="field-note">Matched market ticker</td></tr>
+            <tr><td class="field-name">payload.action</td><td class="field-type">string</td><td class="field-note">BUY | SELL at time of proposal</td></tr>
+            <tr><td class="field-name">payload.max_price</td><td class="field-type">float64</td><td class="field-note">Proposed limit price</td></tr>
+            <tr><td class="field-name">payload.return_pct</td><td class="field-type">float64</td><td class="field-note">Actual realized return (updated on close)</td></tr>
+            <tr><td class="field-name">payload.outcome</td><td class="field-type">string</td><td class="field-note">win | loss | pending</td></tr>
+            <tr><td class="field-name">payload.proposal</td><td class="field-type">string</td><td class="field-note">LLM rationale text</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="schema-card">
+        <div class="schema-header c-blue" style="color:var(--accent);">
+          kalshi_markets Collection (Market Title Embeddings)
+          <span class="schema-db-label">Qdrant · 768-dim cosine</span>
+        </div>
+        <div style="padding:10px 16px; font-size:0.72rem; color:var(--muted);">Each point = one Kalshi/Polymarket contract title, embedded for semantic matching against incoming news headlines.</div>
+        <table class="schema-table">
+          <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td class="field-name">id <span class="pk">PK</span></td><td class="field-type">uint64</td><td class="field-note">Hash of ticker</td></tr>
+            <tr><td class="field-name">vector</td><td class="field-type">[768]float32</td><td class="field-note">Embedding of market title text</td></tr>
+            <tr><td class="field-name">payload.ticker</td><td class="field-type">string</td><td class="field-note">Market ticker symbol</td></tr>
+            <tr><td class="field-name">payload.title</td><td class="field-type">string</td><td class="field-note">Human-readable market title</td></tr>
+            <tr><td class="field-name">payload.yes_ask</td><td class="field-type">float64</td><td class="field-note">Current best ask (YES)</td></tr>
+            <tr><td class="field-name">payload.yes_bid</td><td class="field-type">float64</td><td class="field-note">Current best bid (YES)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Broker -->
+    <h2>Broker Worker — Unix Socket Protocol</h2>
+    <div class="schema-grid">
+      <div class="schema-card">
+        <div class="schema-header c-rose" style="color:var(--accent4);">
+          TradeIntent (Request)
+          <span class="schema-db-label">HTTP POST /execute (Unix socket)</span>
+        </div>
+        <table class="schema-table">
+          <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td class="field-name">contract_id</td><td class="field-type">string</td><td class="field-note">Exchange ticker</td></tr>
+            <tr><td class="field-name">action</td><td class="field-type">string</td><td class="field-note">BUY | SELL</td></tr>
+            <tr><td class="field-name">size</td><td class="field-type">int</td><td class="field-note">Number of contracts</td></tr>
+            <tr><td class="field-name">max_price</td><td class="field-type">float64</td><td class="field-note">Limit price</td></tr>
+            <tr><td class="field-name">exchange</td><td class="field-type">string</td><td class="field-note">kalshi | polymarket</td></tr>
+            <tr><td class="field-name">dry_mode</td><td class="field-type">bool</td><td class="field-note">Skip real order placement if true</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="schema-card">
+        <div class="schema-header c-rose" style="color:var(--accent4);">
+          TradeResult (Response)
+          <span class="schema-db-label">JSON 200</span>
+        </div>
+        <table class="schema-table">
+          <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td class="field-name">success</td><td class="field-type">bool</td><td class="field-note"></td></tr>
+            <tr><td class="field-name">message</td><td class="field-type">string</td><td class="field-note">Human-readable status</td></tr>
+            <tr><td class="field-name">exchange</td><td class="field-type">string</td><td class="field-note">Routing confirmation</td></tr>
+            <tr><td class="field-name">broker_tx_id</td><td class="field-type">string</td><td class="field-note">Exchange-assigned order ID</td></tr>
+            <tr><td class="field-name">signature</td><td class="field-type">string</td><td class="field-note">Signed confirmation (live mode)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>

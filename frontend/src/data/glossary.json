@@ -1,0 +1,187 @@
+{
+  "VWAP": {
+    "term": "VWAP",
+    "definition": "Volume Weighted Average Price. The ratio of the value traded to the total volume traded over a given time horizon. It serves as a key benchmark for executing large-scale orders close to the market average.",
+    "category": "Analytics"
+  },
+  "PnL Delta": {
+    "term": "PnL Delta",
+    "definition": "Profit and Loss Delta. The rate of change of the system's profit and loss profile relative to directional movements in the underlying contract prices or index rates.",
+    "category": "Analytics"
+  },
+  "Open Positions": {
+    "term": "Open Positions",
+    "definition": "The cumulative volume or valuation of active trade contracts held in memory by Gekko that have not yet been closed or offset by matching counter-orders.",
+    "category": "Analytics"
+  },
+  "Net Liquid Capital": {
+    "term": "Net Liquid Capital",
+    "definition": "The total liquid assets (cash + readily convertible positions) currently available in the trading account, net of maintenance margin requirements and dynamic risk offsets.",
+    "category": "Analytics"
+  },
+  "Kafka Ingestion Offset Lag": {
+    "term": "Kafka Ingestion Offset Lag",
+    "definition": "The difference between the latest message offset written by producers to the Kafka brokers and the current offset processed by Gekko's ingestion queue. High lag indicates an ingestion bottleneck.",
+    "category": "Telemetry"
+  },
+  "Ollama Inference Duration": {
+    "term": "Ollama Inference Duration",
+    "definition": "The duration (in milliseconds) taken by the local Ollama neural model instance to process RAG context vectors and generate a qualitative trade recommendation.",
+    "category": "Telemetry"
+  },
+  "Redis Memory State": {
+    "term": "Redis Memory State",
+    "definition": "The real-time RAM footprint, fragmentation ratio, and active key count of the local Redis instance holding simulation state and distributed mutex locks.",
+    "category": "Telemetry"
+  },
+  "Max Slippage Threshold Caps": {
+    "term": "Max Slippage Threshold Caps",
+    "definition": "The hard safety limit defining the maximum allowable difference between the initial proposal price and the actual fill price. Exceeding this triggers automatic order restriction.",
+    "category": "Controls"
+  },
+  "WET/DRY Toggle State": {
+    "term": "WET/DRY Toggle State",
+    "definition": "The system state switch governing order execution. 'WET' executes actual trades on API-connected exchanges; 'DRY' routes proposals through a local simulated matching loop.",
+    "category": "Controls"
+  },
+  "Supervision Control Mode": {
+    "term": "Supervision Control Mode",
+    "definition": "The system validation gate. 'SUPERVISED (MANUAL)' requires manual CLI or web dashboard confirmation for each trade proposal; 'UNSUPERVISED (AUTO)' automatically approves and executes qualifying proposals.",
+    "category": "Controls"
+  },
+  "RAG Context Vector Depth": {
+    "term": "RAG Context Vector Depth",
+    "definition": "Retrieval-Augmented Generation depth. The number of nearest-neighbor semantic context vectors fetched from the Qdrant database to format LLM input templates.",
+    "category": "Controls"
+  },
+  "WORM Ledger Entry Hash": {
+    "term": "WORM Ledger Entry Hash",
+    "definition": "Write Once Read Many Ledger Hash. The SHA-256 cryptographic signature of an immutable entry in the execution ledger, proving that a proposal hasn't been altered.",
+    "category": "Audit/Ledger"
+  },
+  "Cryptographic Block Chain Root": {
+    "term": "Cryptographic Block Chain Root",
+    "definition": "The Merkle Root hash of the immudb block header, cryptographically linking historical entries to guarantee data integrity and detect tampering.",
+    "category": "Audit/Ledger"
+  },
+  "Iceberg Chunk Delays": {
+    "term": "Iceberg Chunk Delays",
+    "definition": "The scheduled pause interval (in milliseconds) between executing sequential slices of an Iceberg order. Designed to shield trades from HFT scanning and front-running.",
+    "category": "Audit/Ledger"
+  },
+  "Slippage": {
+    "term": "Slippage",
+    "definition": "The difference between the expected execution price of an order and the actual price at which it is filled. High volatility or delayed execution can cause larger slippage.",
+    "category": "Analytics"
+  },
+  "Iceberg Execution Timeline": {
+    "term": "Iceberg Execution Timeline",
+    "definition": "A visual mapping of sliced trade chunks executed incrementally with delays to avoid moving market prices or alerting HFT algorithms.",
+    "category": "Audit/Ledger"
+  },
+  "NAV": {
+    "term": "NAV (Net Asset Value)",
+    "definition": "The total current market value of all assets held in the trading portfolio, including open positions marked-to-market and uninvested cash. NAV tracks compound portfolio growth over time and is the primary performance benchmark.",
+    "category": "Portfolio Analytics"
+  },
+  "Profit Factor": {
+    "term": "Profit Factor",
+    "definition": "A key edge metric computed as Gross Profits divided by Gross Losses across all closed trades. A Profit Factor above 1.0 indicates a profitable strategy; above 1.5 is considered strong; below 1.0 means the strategy destroys capital.",
+    "category": "Portfolio Analytics"
+  },
+  "Drawdown": {
+    "term": "Drawdown",
+    "definition": "The peak-to-trough percentage decline in portfolio NAV from a prior equity high. Maximum Drawdown (MDD) measures the worst historical loss sustained before recovering, and is a critical risk management metric — deeper drawdowns require larger subsequent gains to recover.",
+    "category": "Portfolio Analytics"
+  },
+  "Win-Rate Variance": {
+    "term": "Win-Rate Variance",
+    "definition": "The percentage of closed trades that yielded a positive return (wins / total trades). Higher win rates are not always better — a strategy with 40% wins but large average winners can outperform one with 70% wins but small average winners. Win-Rate should always be analyzed alongside Profit Factor and Average Win/Loss ratio.",
+    "category": "Portfolio Analytics"
+  },
+  "PnL": {
+    "term": "PnL (Profit & Loss)",
+    "definition": "The net realized gain or loss across closed trades, in dollars. Computed as (exit price − entry price) × size, summed over every settled position. Green is net profit; red is net loss.",
+    "category": "Portfolio Analytics"
+  },
+  "Sharpe Ratio": {
+    "term": "Sharpe Ratio",
+    "definition": "A risk-adjusted return measure: average return divided by the standard deviation of returns. Higher is better — it tells you how much return you earned per unit of total volatility. Above 1 is decent, above 2 is strong. Shown annualized on the equity curve, and per-trade (risk-free rate = 0) on the strategy/book scorecards.",
+    "category": "Portfolio Analytics"
+  },
+  "Sortino Ratio": {
+    "term": "Sortino Ratio",
+    "definition": "A variant of the Sharpe Ratio that divides return only by downside deviation — the volatility of losing moves — instead of total volatility. It doesn't penalize upside swings, so it better reflects harmful risk. Higher is better; a Sortino above its matching Sharpe means most of the volatility is favorable.",
+    "category": "Portfolio Analytics"
+  },
+  "Expectancy": {
+    "term": "Expectancy",
+    "definition": "The mean realized profit or loss per closed trade, in dollars: total realized P&L divided by the number of trades. Positive expectancy means the average trade makes money; it is the single best summary of whether an edge exists.",
+    "category": "Portfolio Analytics"
+  },
+  "Return on Capital": {
+    "term": "Return on Capital",
+    "definition": "Capital-weighted return: total realized P&L divided by the total capital deployed across trades (ΣP&L / Σcapital). Unlike an unweighted average of per-trade percentages, it reconciles with actual dollar P&L, so a few large positions can't be masked by many tiny ones.",
+    "category": "Portfolio Analytics"
+  },
+  "Total Trades": {
+    "term": "Total Trades",
+    "definition": "The number of closed (settled) positions in the sample. Larger samples make the risk-adjusted metrics — Sharpe, Sortino, Profit Factor — statistically meaningful; small samples are noisy and are gated behind a minimum-trade threshold.",
+    "category": "Portfolio Analytics"
+  },
+  "vs SPY": {
+    "term": "vs SPY (benchmark)",
+    "definition": "How the portfolio's NAV compares to simply buying and holding SPY (the S&P 500 ETF) with the same starting capital over the same period. Positive means Gekko is beating a passive index; negative means the index would have done better.",
+    "category": "Portfolio Analytics"
+  },
+  "Persona": {
+    "term": "Strategy Persona",
+    "definition": "One of Gekko's distinct trading agents (e.g. bull, cautious-bull, bear), each with its own stance, risk tier, and LLM backend. The scorecard breaks realized performance out per persona so their individual edge — not just the consensus — is visible.",
+    "category": "Portfolio Analytics"
+  },
+  "Average Win/Loss": {
+    "term": "Average Win / Average Loss",
+    "definition": "The mean dollar profit of winning trades versus the mean dollar loss of losing trades. The ratio between them (the 'payoff ratio') shows whether your winners are big enough to outweigh your losers, independent of how often you win.",
+    "category": "Portfolio Analytics"
+  },
+  "Realized Return": {
+    "term": "Realized Return",
+    "definition": "The percentage gain or loss locked in when a position was closed, relative to its entry price: (exit − entry) / entry. 'Realized' means the trade is settled — unlike unrealized (paper) gains on positions still held.",
+    "category": "Portfolio Analytics"
+  },
+  "Contract Side": {
+    "term": "Contract Side (Yes / No)",
+    "definition": "Which outcome of a binary prediction-market contract the position took. 'Yes' profits if the event resolves true; 'No' profits if it resolves false. Each settles at $1.00 if correct or $0.00 if not.",
+    "category": "Portfolio Analytics"
+  },
+  "Cash Balance": {
+    "term": "Cash Balance",
+    "definition": "Uncommitted capital available to open new positions — total fund equity minus margin currently locked in open trades.",
+    "category": "Portfolio Analytics"
+  },
+  "Locked Margin": {
+    "term": "Locked Margin",
+    "definition": "Capital currently reserved as collateral against open positions. It is unavailable for new trades until those positions are closed or settled.",
+    "category": "Portfolio Analytics"
+  },
+  "Avg MFE": {
+    "term": "Avg MFE",
+    "definition": "Average Maximum Favorable Excursion: for each closed trade, the best unrealized gain the position reached at any point while open, as a % of entry cost, averaged across trades. A high MFE alongside a low win rate means the book sees profit but doesn't bank it — exits are too late.",
+    "category": "Portfolio Analytics"
+  },
+  "Avg MAE": {
+    "term": "Avg MAE",
+    "definition": "Average Maximum Adverse Excursion: for each closed trade, the worst unrealized loss the position hit at any point while open, as a % of entry cost, averaged across trades. It shows how much heat trades take before resolving; a large MAE suggests entries are early or stops are too loose.",
+    "category": "Portfolio Analytics"
+  },
+  "Spread Paid": {
+    "term": "Spread Paid",
+    "definition": "Total dollars lost crossing the bid-ask spread: buys fill at the ask and positions are marked at the mid. This cost is already inside realized P&L — it explains the result rather than adjusting it.",
+    "category": "Portfolio Analytics"
+  },
+  "Fees (modelled)": {
+    "term": "Fees (modelled)",
+    "definition": "Estimated exchange fees on all closed trades. The paper account never actually charged them, so they are not in realized P&L; subtract them to see the true net result.",
+    "category": "Portfolio Analytics"
+  }
+}

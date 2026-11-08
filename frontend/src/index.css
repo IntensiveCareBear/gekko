@@ -1,0 +1,565 @@
+/* Web fonts for themed skins. Oswald = Black Mesa hazard/HUD signage feel;
+   Share Tech Mono = terminal readout; Barlow Semi Condensed = Aperture/Portal
+   DIN-style facility signage.
+
+   Must stay ABOVE the tailwindcss import: the v4 PostCSS plugin inlines that one
+   in place (~2,250 lines), so a font @import below it lands after thousands of
+   statements and trips "@import must precede all other statements". */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Oswald:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@400;500;600;700&family=Share+Tech+Mono&display=swap');
+@import "tailwindcss";
+
+:root {
+  --bg-color: #0b0f19;
+  --card-bg: rgba(17, 24, 39, 0.7);
+  --border-color: rgba(99, 102, 241, 0.2);
+  --primary: #6366f1;
+  --accent-green: #10b981;
+  --accent-red: #f43f5e;
+  /* Dedicated hue for the SPY benchmark line in Chart 1. Kept distinct from
+     --primary because several themes set --primary to a pink/red that collides
+     with --accent-red (drawdown). Blue reads clearly against both the green NAV
+     area and the red drawdown line on every theme's background. Defined only
+     here so all themes inherit it unless they explicitly override it below. */
+  --chart-benchmark: #3b82f6;
+  --text-main: #f3f4f6;
+  --text-muted: #9ca3af;
+  --glow-green: rgba(16, 185, 129, 0.15);
+  --glow-red: rgba(244, 63, 94, 0.15);
+  --font-sans: 'Outfit', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+/* Base Styles */
+html { scroll-behavior: smooth; }
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  min-height: 100dvh;
+  transition: background-color 0.3s, color 0.3s;
+  -webkit-font-smoothing: antialiased;
+  /* Aligned digits everywhere: this is a P&L / prices dashboard. */
+  font-variant-numeric: tabular-nums;
+}
+
+h1, h2, h3 { text-wrap: balance; letter-spacing: -0.01em; }
+p { text-wrap: pretty; }
+
+/* Interaction feedback shared by every control, theme-colored. */
+button, [role="button"], a, select, input, summary {
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s, opacity 0.2s,
+    transform 0.15s, box-shadow 0.2s;
+}
+button:not(:disabled):active, [role="button"]:active { transform: scale(0.98); }
+button:disabled { cursor: not-allowed; }
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Theme: Synthwave 84 Overrides */
+.theme-synth84 {
+  --bg-color: #10061e;
+  --card-bg: rgba(24, 10, 40, 0.85);
+  --border-color: rgba(255, 0, 127, 0.35);
+  --primary: #ff007f;
+  --accent-green: #00ffff;
+  --accent-red: #ff2a6d;
+  --text-main: #fcf8ff;
+  --text-muted: #8d75a3;
+  --glow-green: rgba(0, 255, 20, 0.08);
+  --glow-red: rgba(255, 51, 51, 0.08);
+  background-image: 
+    linear-gradient(rgba(255, 0, 127, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 0, 127, 0.02) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+/* Theme: Blade Runner CRT phosphor Overrides */
+.theme-bladerunner {
+  --bg-color: #0c0908;
+  --card-bg: rgba(14, 11, 10, 0.98);
+  --border-color: rgba(255, 176, 0, 0.3);
+  --primary: #ffb000;
+  --accent-green: #39ff14;
+  --accent-red: #ff3333;
+  --text-main: #ffca36;
+  --text-muted: #9e7011;
+  --glow-green: rgba(57, 255, 20, 0.08);
+  --glow-red: rgba(255, 51, 51, 0.08);
+  --font-sans: 'Share Tech Mono', 'JetBrains Mono', monospace;
+  --font-mono: 'Share Tech Mono', 'JetBrains Mono', monospace;
+}
+
+/* Theme: Royal Court Overrides */
+.theme-royal {
+  --bg-color: #0b1126;
+  --card-bg: rgba(13, 22, 54, 0.95);
+  --border-color: rgba(212, 175, 55, 0.3);
+  --primary: #d4af37;
+  --accent-green: #2ecc71;
+  --accent-red: #e74c3c;
+  --text-main: #f5ecc8;
+  --text-muted: #aa9350;
+  --glow-green: rgba(46, 204, 113, 0.1);
+  --glow-red: rgba(231, 76, 60, 0.1);
+  --font-sans: 'Cinzel', 'Georgia', serif;
+  --font-mono: 'Cinzel', 'Georgia', serif;
+  background-image: radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.05) 0%, transparent 60%);
+}
+
+/* Theme: Django Smooth (dark forest green) */
+.theme-django {
+  --bg-color: #245032;
+  --card-bg: rgba(20, 40, 26, 0.9);
+  --border-color: rgba(115, 218, 112, 0.28);
+  --primary: #73da70;
+  --accent-green: #41a83e;
+  --accent-red: #fd6209;
+  --text-main: #f8f8f8;
+  --text-muted: #9fbf9f;
+  --glow-green: rgba(65, 168, 62, 0.12);
+  --glow-red: rgba(253, 98, 9, 0.1);
+}
+
+/* Theme: Jackie Brown (amber-on-espresso terminal) */
+.theme-jackiebrown {
+  --bg-color: #2c1d16;
+  --card-bg: rgba(30, 20, 15, 0.92);
+  --border-color: rgba(255, 204, 47, 0.3);
+  --primary: #ffcc2f;
+  --accent-green: #2baf2b;
+  --accent-red: #ef5734;
+  --text-main: #ffcc2f;
+  --text-muted: #b8912a;
+  --glow-green: rgba(43, 175, 43, 0.1);
+  --glow-red: rgba(239, 87, 52, 0.1);
+}
+
+/* Theme: Mellifluous (muted charcoal + mauve) */
+.theme-mellifluous {
+  --bg-color: #1a1a1a;
+  --card-bg: rgba(34, 34, 34, 0.92);
+  --border-color: rgba(156, 105, 149, 0.28);
+  --primary: #9c6995;
+  --accent-green: #8faf8f;
+  --accent-red: #c95954;
+  --text-main: #dadada;
+  --text-muted: #8a8a8a;
+  --glow-green: rgba(143, 175, 143, 0.1);
+  --glow-red: rgba(201, 89, 84, 0.1);
+}
+
+/* Theme: Belafonte Night (muted dark plum + amber) */
+.theme-belafonte {
+  --bg-color: #20111b;
+  --card-bg: rgba(28, 15, 24, 0.92);
+  --border-color: rgba(234, 165, 73, 0.25);
+  --primary: #eaa549;
+  --accent-green: #858162;
+  --accent-red: #be100e;
+  --text-main: #cfc4ba;
+  --text-muted: #8a8078;
+  --glow-green: rgba(133, 129, 98, 0.1);
+  --glow-red: rgba(190, 16, 14, 0.12);
+}
+
+/* Theme: Blue Dolphin (teal sea + light cyan) */
+.theme-bluedolphin {
+  --bg-color: #006984;
+  --card-bg: rgba(0, 62, 80, 0.55);
+  --border-color: rgba(255, 204, 0, 0.32);
+  --primary: #ffcc00;
+  --accent-green: #b4e88d;
+  --accent-red: #ff8289;
+  --text-main: #c5f2ff;
+  --text-muted: #9fd4e0;
+  --glow-green: rgba(180, 232, 141, 0.12);
+  --glow-red: rgba(255, 130, 137, 0.12);
+}
+
+/* Theme: Cyberdyne (indigo terminal + phosphor green) */
+.theme-cyberdyne {
+  --bg-color: #151144;
+  --card-bg: rgba(18, 14, 50, 0.9);
+  --border-color: rgba(0, 255, 146, 0.28);
+  --primary: #00ff92;
+  --accent-green: #00c172;
+  --accent-red: #ff8373;
+  --text-main: #00ff92;
+  --text-muted: #00b368;
+  --glow-green: rgba(0, 255, 146, 0.12);
+  --glow-red: rgba(255, 131, 115, 0.12);
+}
+
+/* Theme: base16 Icy (monochrome cyan on near-black).
+   Foreground/red are absent from the source palette, so text-main is lifted to a
+   brighter cyan and accent-red is a legible rose for P&L contrast. */
+.theme-base16icy {
+  --bg-color: #021012;
+  --card-bg: rgba(5, 25, 29, 0.88);
+  --border-color: rgba(22, 194, 217, 0.28);
+  --primary: #16c2d9;
+  --accent-green: #4dd0e1;
+  --accent-red: #f4708a;
+  --text-main: #b3ebf2;
+  --text-muted: #5a9aa5;
+  --glow-green: rgba(77, 208, 225, 0.12);
+  --glow-red: rgba(244, 112, 138, 0.12);
+}
+
+/* Theme: Batman (yellow on charcoal). Source is monochrome yellow, so the
+   gain/loss accents are a legible yellow-green / red pair. */
+.theme-batman {
+  --bg-color: #1b1d1e;
+  --card-bg: rgba(30, 32, 33, 0.92);
+  --border-color: rgba(252, 239, 12, 0.25);
+  --primary: #f5e70c;
+  --accent-green: #9fd645;
+  --accent-red: #e0554e;
+  --text-main: #c6c5bf;
+  --text-muted: #8a8a86;
+  --glow-green: rgba(159, 214, 69, 0.1);
+  --glow-red: rgba(224, 85, 78, 0.12);
+}
+
+/* Theme: Darkmatrix (phosphor green on black). Loss accent is a legible red. */
+.theme-darkmatrix {
+  --bg-color: #070c0e;
+  --card-bg: rgba(10, 18, 14, 0.9);
+  --border-color: rgba(144, 215, 98, 0.25);
+  --primary: #90d762;
+  --accent-green: #6fa64c;
+  --accent-red: #d1495b;
+  --text-main: #8fce5e;
+  --text-muted: #5c7d38;
+  --glow-green: rgba(144, 215, 98, 0.12);
+  --glow-red: rgba(209, 73, 91, 0.12);
+}
+
+/* Theme: Emerald Synth (emerald + hot-pink on deep purple) */
+.theme-emeraldsynth {
+  --bg-color: #0d0221;
+  --card-bg: rgba(22, 8, 45, 0.9);
+  --border-color: rgba(0, 255, 204, 0.28);
+  --primary: #00ffcc;
+  --accent-green: #00e67e;
+  --accent-red: #ff2a6d;
+  --text-main: #b9fff2;
+  --text-muted: #7d9d97;
+  --glow-green: rgba(0, 230, 126, 0.12);
+  --glow-red: rgba(255, 42, 109, 0.12);
+}
+
+/* Theme: HaX0R Blue (monochrome azure terminal on near-black navy) */
+.theme-hax0rblue {
+  --bg-color: #010515;
+  --card-bg: rgba(4, 12, 30, 0.9);
+  --border-color: rgba(16, 182, 255, 0.25);
+  --primary: #10b6ff;
+  --accent-green: #3ad6a0;
+  --accent-red: #ff4d6d;
+  --text-main: #10b6ff;
+  --text-muted: #0b7bab;
+  --glow-green: rgba(58, 214, 160, 0.12);
+  --glow-red: rgba(255, 77, 109, 0.12);
+}
+
+/* Theme: Laser (hot magenta + neon green on deep navy) */
+.theme-laser {
+  --bg-color: #030d18;
+  --card-bg: rgba(11, 17, 30, 0.9);
+  --border-color: rgba(241, 6, 227, 0.28);
+  --primary: #f106e3;
+  --accent-green: #4dff9e;
+  --accent-red: #ff5e7a;
+  --text-main: #f0a6e8;
+  --text-muted: #9c6f97;
+  --glow-green: rgba(77, 255, 158, 0.12);
+  --glow-red: rgba(255, 94, 122, 0.12);
+}
+
+/* Theme: Liquid Carbon (muted cyan/teal on graphite) */
+.theme-liquidcarbon {
+  --bg-color: #303030;
+  --card-bg: rgba(38, 42, 42, 0.9);
+  --border-color: rgba(0, 153, 204, 0.25);
+  --primary: #0099cc;
+  --accent-green: #559b70;
+  --accent-red: #ff4d4d;
+  --text-main: #afc2c2;
+  --text-muted: #6b7f7f;
+  --glow-green: rgba(85, 155, 112, 0.12);
+  --glow-red: rgba(255, 77, 77, 0.12);
+}
+
+/* Theme: Miami Heat (hot pink + mint on deep purple) */
+.theme-miamiheat {
+  --bg-color: #120b2e;
+  --card-bg: rgba(28, 10, 55, 0.9);
+  --border-color: rgba(255, 61, 127, 0.28);
+  --primary: #ff3d7f;
+  --accent-green: #2ee6b6;
+  --accent-red: #ff2e6d;
+  --text-main: #fce7ff;
+  --text-muted: #9a7fa0;
+  --glow-green: rgba(46, 230, 182, 0.12);
+  --glow-red: rgba(255, 46, 109, 0.12);
+}
+
+/* Theme: Neon Purple (neon violet + spring-green on royal purple) */
+.theme-neonpurple {
+  --bg-color: #291b47;
+  --card-bg: rgba(40, 20, 66, 0.9);
+  --border-color: rgba(209, 107, 255, 0.28);
+  --primary: #d16bff;
+  --accent-green: #03eba5;
+  --accent-red: #ff2f92;
+  --text-main: #e6e6e6;
+  --text-muted: #8f83a3;
+  --glow-green: rgba(3, 235, 165, 0.12);
+  --glow-red: rgba(255, 47, 146, 0.12);
+}
+
+/* Theme: Ocean (classic Terminal.app blue — white text on saturated blue) */
+.theme-ocean {
+  --bg-color: #224fbc;
+  --card-bg: rgba(13, 40, 110, 0.6);
+  --border-color: rgba(255, 255, 255, 0.18);
+  --primary: #33c9d6;
+  --accent-green: #4dd94d;
+  --accent-red: #ff6b6b;
+  --text-main: #ffffff;
+  --text-muted: #bcd0f0;
+  --glow-green: rgba(77, 217, 77, 0.12);
+  --glow-red: rgba(255, 107, 107, 0.12);
+}
+
+/* Theme: Sleepy Hollow (muted amber + olive on near-black brown) */
+.theme-sleepyhollow {
+  --bg-color: #121213;
+  --card-bg: rgba(24, 20, 18, 0.9);
+  --border-color: rgba(246, 104, 19, 0.25);
+  --primary: #f66813;
+  --accent-green: #8fa35a;
+  --accent-red: #d94f49;
+  --text-main: #af9a91;
+  --text-muted: #6f625c;
+  --glow-green: rgba(143, 163, 90, 0.12);
+  --glow-red: rgba(217, 79, 73, 0.12);
+}
+
+/* Theme: Light Mode */
+.theme-light {
+  --bg-color: #eef2f7;
+  --card-bg: rgba(255, 255, 255, 0.9);
+  --border-color: rgba(15, 23, 42, 0.12);
+  --primary: #4f46e5;       /* indigo-600 — darker for contrast on light */
+  --accent-green: #059669;  /* emerald-600 */
+  --accent-red: #e11d48;    /* rose-600 */
+  --text-main: #0f172a;     /* slate-900 */
+  --text-muted: #475569;    /* slate-600 */
+  --glow-green: rgba(5, 150, 105, 0.12);
+  --glow-red: rgba(225, 29, 72, 0.12);
+}
+
+/* Theme: Everforest Light Hard.
+   Applied alongside .theme-light (see App.tsx), so it inherits the light-mode
+   compatibility overrides below while re-pointing the palette to Everforest. */
+.theme-everforest {
+  --bg-color: #f2efdf;
+  --card-bg: rgba(255, 253, 245, 0.8);
+  --border-color: rgba(92, 106, 114, 0.18);
+  --primary: #8da101;
+  --accent-green: #8da101;
+  --accent-red: #e67e80;
+  --text-main: #5c6a72;
+  --text-muted: #7a8478;
+  --glow-green: rgba(141, 161, 1, 0.12);
+  --glow-red: rgba(230, 126, 128, 0.12);
+}
+
+/* Theme: Letterpress. Also paired with .theme-light (see App.tsx). */
+.theme-letterpress {
+  --bg-color: #f3ecdf;
+  --card-bg: rgba(255, 255, 255, 0.7);
+  --border-color: rgba(58, 53, 44, 0.16);
+  --primary: #176b5f;
+  --accent-green: #506b24;
+  --accent-red: #b0202a;
+  --text-main: #3a352c;
+  --text-muted: #8e886f;
+  --glow-green: rgba(80, 107, 36, 0.12);
+  --glow-red: rgba(176, 32, 42, 0.12);
+}
+
+/* Theme: Kanagawa Lotus (muted ink on warm cream). Paired with .theme-light (see App.tsx). */
+.theme-kanagawalotus {
+  --bg-color: #f2ecbc;
+  --card-bg: rgba(255, 253, 245, 0.8);
+  --border-color: rgba(77, 105, 155, 0.2);
+  --primary: #4d699b;
+  --accent-green: #6f894e;
+  --accent-red: #c84053;
+  --text-main: #545464;
+  --text-muted: #8a8980;
+  --glow-green: rgba(111, 137, 78, 0.12);
+  --glow-red: rgba(200, 64, 83, 0.12);
+}
+
+/*
+ * Light-mode compatibility overrides.
+ * Most components use the CSS-variable palette above, but a number of them hard-code
+ * dark-mode Tailwind utilities (white-alpha surfaces/borders meant for dark backgrounds,
+ * and light slate/accent text). Those become invisible or low-contrast on a light bg.
+ * We re-map just those tokens here, scoped to .theme-light so the dark themes are untouched.
+ * Attribute selectors ([class~="…"]) avoid escaping Tailwind's slashes/brackets and out-rank
+ * the single-class utilities they override.
+ */
+
+/* White-alpha surfaces → subtle dark tints */
+.theme-light [class~="bg-white/2"],
+.theme-light [class~="bg-white/[0.015]"],
+.theme-light [class~="bg-white/[0.02]"],
+.theme-light [class~="bg-white/[0.03]"],
+.theme-light [class~="bg-white/[0.04]"] { background-color: rgba(15, 23, 42, 0.03); }
+.theme-light [class~="bg-white/5"],
+.theme-light [class~="bg-white/[0.06]"] { background-color: rgba(15, 23, 42, 0.05); }
+.theme-light [class~="bg-white/10"] { background-color: rgba(15, 23, 42, 0.08); }
+
+/* White-alpha borders → subtle dark borders */
+.theme-light [class~="border-white/5"],
+.theme-light [class~="border-white/[0.04]"],
+.theme-light [class~="border-white/[0.06]"] { border-color: rgba(15, 23, 42, 0.08); }
+.theme-light [class~="border-white/10"],
+.theme-light [class~="border-white/20"],
+.theme-light [class~="border-white/25"] { border-color: rgba(15, 23, 42, 0.14); }
+
+/* Light slate text → dark text */
+.theme-light [class~="text-slate-100"],
+.theme-light [class~="text-slate-200"],
+.theme-light [class~="text-slate-300"] { color: #1e293b; }
+.theme-light [class~="text-slate-400"] { color: #475569; }
+
+/* Accent text variants tuned for light backgrounds (darker tones). Leaves text-white,
+   used on solid-colour buttons, alone. */
+.theme-light [class~="text-amber-300"],
+.theme-light [class~="text-amber-400"] { color: #b45309; }
+.theme-light [class~="text-emerald-300"],
+.theme-light [class~="text-emerald-400"] { color: #047857; }
+.theme-light [class~="text-rose-300"],
+.theme-light [class~="text-rose-400"] { color: #be123c; }
+.theme-light [class~="text-indigo-300"],
+.theme-light [class~="text-indigo-400"] { color: #4338ca; }
+.theme-light [class~="text-sky-400"] { color: #0369a1; }
+.theme-light [class~="text-blue-400"] { color: #1d4ed8; }
+.theme-light [class~="text-purple-400"] { color: #7e22ce; }
+
+/* The Strategy Stream header title is a white→muted gradient clipped to text;
+   re-point the "from" stop to a dark colour so it stays legible on light. */
+.theme-light [class~="from-white"] { --tw-gradient-from: #0f172a; }
+
+/* CRT Flicker animation for Blade Runner theme */
+.theme-bladerunner::before {
+  content: " ";
+  display: block;
+  position: fixed;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+  background-size: 100% 4px;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+/* Micro-animations and utility styles */
+@keyframes pulse {
+  0% { transform: scale(0.9); opacity: 0.6; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.6; }
+}
+
+.animate-pulse-live {
+  animation: pulse 1.8s infinite;
+}
+
+/* ============================================================
+   Theme: Black Mesa Research Facility (Half-Life)
+   Hazard orange + HEV green on industrial near-black. Oswald
+   condensed signage face + Share Tech Mono terminal readout,
+   with faint diagonal caution stripes and a CRT vignette.
+   ============================================================ */
+.theme-blackmesa {
+  --bg-color: #0a0c0d;
+  --card-bg: rgba(19, 21, 20, 0.92);
+  --border-color: rgba(245, 166, 35, 0.30);
+  --primary: #f5a623;            /* Black Mesa hazard orange */
+  --accent-green: #8bc34a;       /* HEV suit green */
+  --accent-red: #ff4b1f;         /* warning / resonance-cascade red */
+  --text-main: #f3ead6;          /* warm terminal off-white */
+  --text-muted: #8f8975;
+  --glow-green: rgba(139, 195, 74, 0.14);
+  --glow-red: rgba(255, 75, 31, 0.14);
+  --font-sans: 'Oswald', 'Impact', 'Arial Narrow', sans-serif;
+  --font-mono: 'Share Tech Mono', 'JetBrains Mono', monospace;
+  background-color: var(--bg-color);
+  background-image:
+    /* faint hazard caution stripes */
+    repeating-linear-gradient(45deg,
+      rgba(245, 166, 35, 0.035) 0px,
+      rgba(245, 166, 35, 0.035) 14px,
+      transparent 14px,
+      transparent 28px),
+    /* facility vignette */
+    radial-gradient(circle at 50% 12%, rgba(245, 166, 35, 0.06) 0%, transparent 55%);
+}
+
+/* CRT scanline overlay, same technique as the Blade Runner skin */
+.theme-blackmesa::before {
+  content: " ";
+  display: block;
+  position: fixed;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.18) 50%);
+  background-size: 100% 3px;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+/* ============================================================
+   Theme: Aperture Science Enrichment Center (Portal)
+   Clean white test-chamber panels, portal-blue primary and
+   portal-orange accent, Barlow Semi Condensed facility signage.
+   Carries .theme-light — this block is declared AFTER the
+   .theme-light overrides so its palette variables win.
+   ============================================================ */
+.theme-aperture {
+  --bg-color: #eef1f5;
+  --card-bg: rgba(255, 255, 255, 0.90);
+  --border-color: rgba(0, 132, 209, 0.28);
+  --primary: #0088d1;            /* portal blue */
+  --accent-green: #1f9e5a;
+  --accent-red: #ff6a00;         /* portal orange */
+  --text-main: #17222e;
+  --text-muted: #5c6b7a;
+  --glow-green: rgba(0, 136, 209, 0.10);
+  --glow-red: rgba(255, 106, 0, 0.12);
+  --font-sans: 'Barlow Semi Condensed', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Share Tech Mono', monospace;
+  background-color: var(--bg-color);
+  background-image:
+    /* clean test-chamber panel grid */
+    linear-gradient(rgba(0, 132, 209, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 132, 209, 0.05) 1px, transparent 1px);
+  background-size: 46px 46px;
+}

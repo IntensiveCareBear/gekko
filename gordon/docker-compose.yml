@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  gordon:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gekko-gordon
+    environment:
+      - REDIS_ADDR=gekko-redis:6379
+      - KAFKA_BROKERS=gekko-kafka:29092
+      - KAFKA_INBOUND_TOPIC=kahuna.ingest.public
+      - KAFKA_OUTBOUND_TOPIC=gordon.strategies.proposed
+      - KAFKA_CONSUMER_GROUP=gordon-group
+      - KAFKA_SIMULATED=false
+      - QDRANT_URL=http://gekko-qdrant:6333
+      - OLLAMA_URL=http://host.docker.internal:11434
+    # Essential for terminal user interfaces (Bubble Tea) to render and receive keypresses inside container environments
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+
+networks:
+  default:
+    name: gekko-1_default
+    external: true

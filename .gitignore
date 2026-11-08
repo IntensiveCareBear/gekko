@@ -1,0 +1,72 @@
+# Compiled Go binaries
+*_bin
+gordon/gordon
+broker-worker/broker_worker_bin
+broker-worker/broker-worker
+executive-core/executive_core_bin
+executive-core/executive-core
+kahuna/kahuna_bin
+gordon/gordon_bin
+gordon/liveview/liveview_bin
+gordon/liveview/liveview
+marketdata/marketdata_bin
+marketdata/marketdata
+
+# Runtime data & state
+executive-core/ledger.db
+qdrant_storage/
+kahuna/quarantine/*.json
+gordon/liveview_output.txt
+
+# Secrets / env
+.env
+*.env
+.env.local
+
+# Node / frontend build output
+node_modules/
+frontend/node_modules/
+frontend/dist/
+dist/
+
+# Editor / OS
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# run.sh service logs
+logs/
+
+# Paper-run exports
+runs/
+
+# Secrets / API keys (user-provided, never commit)
+*.pem
+*.key
+secrets/
+keys/
+# Kalshi private key (plaintext download)
+gekko.txt
+# Twitter/X API bearer token (plaintext)
+twitter.txt
+# Gemini / AI Studio API key (plaintext)
+GEMINI_API_KEY.txt
+# Twitter/X daily spend counter (runtime state)
+.twitter_budget.json
+breen/breen
+breen/ledger.db
+.claude
+frontend/.vite
+lou/lou
+finhub.txt
+fred.txt
+kalshi_api_key.txt
+# TRMNL private-plugin UUID (user-provided, never commit)
+trmnl_plugin_uuid.txt
+
+# Local backups / extra creds (never commit)
+migration_backup/
+reddit.txt
+*.db
+breen/executive-core
