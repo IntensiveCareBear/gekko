@@ -158,4 +158,4 @@ Design notes, proposals and post-mortems of past paper runs live in [docs/](docs
 
 ## License
 
-TBD.
+[MIT](LICENSE)
